@@ -20,7 +20,8 @@ public class TranslateTo : MonoBehaviour
     void UpdatePos()
     {
         //Rotation
-        transform.rotation = OffsetObjPos.rotation;
+        //transform.rotation = OffsetObjPos.rotation;
+        transform.rotation = Quaternion.Euler(0, OffsetObjPos.eulerAngles.y, 0);
 
         //Position
 
@@ -39,6 +40,7 @@ public class TranslateTo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdatePos();    
+        if(Input.GetKeyDown(KeyCode.R))
+            UpdatePos();    
     }
 }
