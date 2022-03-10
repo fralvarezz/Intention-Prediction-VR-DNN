@@ -33,7 +33,7 @@ public class TranslateTo : MonoBehaviour
         HaRT_coreObjPos.position -= offset;
         
         //Rotation HaRT_core rotation
-        HaRT_coreObjPos.rotation = OffsetObjPos.rotation;
+        HaRT_coreObjPos.rotation = Quaternion.Euler(0, OffsetObjPos.eulerAngles.y, 0);
 
     }
     
