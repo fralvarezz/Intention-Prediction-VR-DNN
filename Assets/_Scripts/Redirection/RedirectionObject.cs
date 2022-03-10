@@ -58,6 +58,17 @@ namespace HR_Toolkit
 
         }
 
+        private void Update()
+        {
+            if (Input.GetButtonDown("Submit"))
+            {
+                if(!_isGrabbed)
+                    OnGrab();
+                else
+                    OnRelease();
+            }
+        }
+
         public void Redirect()
         {
             redirectionTechnique.ApplyRedirection(RedirectionManager.instance.realHand.transform, 
@@ -119,14 +130,14 @@ namespace HR_Toolkit
 
         private void OnTriggerStay(Collider other)
         {
-            if (!other.CompareTag("virtualHand") || thisIsAResetPosition) return;
+            /*if (!other.CompareTag("virtualHand") || thisIsAResetPosition) return;
             if (Input.GetButtonDown("Submit"))
             {
                 if(!_isGrabbed)
                     OnGrab();
                 else
                     OnRelease();
-            }
+            }*/
         }
 
         private void HighlightOn()
