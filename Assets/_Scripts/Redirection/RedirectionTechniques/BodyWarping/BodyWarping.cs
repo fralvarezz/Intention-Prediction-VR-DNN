@@ -133,7 +133,7 @@ namespace HR_Toolkit
 
             return Vector3.Angle(posVirtual, posReal);
         }
-
+  
         public static float GetGainFactor(RedirectionObject redirectionObject)
         {
             if (redirectionObject == null)

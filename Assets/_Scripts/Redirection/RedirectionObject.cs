@@ -22,6 +22,7 @@ namespace HR_Toolkit
         public RedirectionObject resetPosition;
         public bool useResetPosition;
         public bool thisIsAResetPosition;
+        public bool shouldFollowReal;
         
         [Space]
         [Header("Redirection Events:")]
@@ -29,6 +30,9 @@ namespace HR_Toolkit
         public UnityEvent onRedirectionDeactivated;
 
         private Color _startColor;
+        
+        private bool _isGrabbed;
+        private Vector3 _currentWarp;
 
         void Start()
         {
@@ -63,6 +67,7 @@ namespace HR_Toolkit
 
         public void StartRedirection()
         {
+            Debug.Log("StartRedirection");
             onRedirectionActivated.Invoke();
             redirectionTechnique.Init(this, RedirectionManager.instance.body.transform,RedirectionManager.instance.warpOrigin.transform.position);
             HighlightOn();
@@ -77,6 +82,24 @@ namespace HR_Toolkit
             {
                 resetPosition.HighlightOff();
             }
+        }
+
+        public void Follow()
+        {
+            if (!shouldFollowReal || !_isGrabbed)
+                return;
+            transform.rotation = GetRealRot();
+            transform.position = GetRealTargetPos() + _currentWarp;
+        }
+
+        public void OnGrab()
+        {
+            _isGrabbed = true;
+        }
+
+        public void OnRelease()
+        {
+            _isGrabbed = false;
         }
         
         
@@ -93,6 +116,19 @@ namespace HR_Toolkit
             if (!other.CompareTag("virtualHand") || thisIsAResetPosition) return;
             OnHandEnter();
         }
+
+        private void OnTriggerStay(Collider other)
+        {
+            if (!other.CompareTag("virtualHand") || thisIsAResetPosition) return;
+            if (Input.GetButtonDown("Submit"))
+            {
+                if(!_isGrabbed)
+                    OnGrab();
+                else
+                    OnRelease();
+            }
+        }
+
         private void HighlightOn()
         {
             _startColor = this.GetComponent<Renderer>().material.color;
@@ -102,6 +138,7 @@ namespace HR_Toolkit
         private void HighlightOff()
         {
             GetComponent<Renderer>().material.color = _startColor;
+            Debug.Log(_startColor);
         }
 
 
@@ -175,6 +212,16 @@ namespace HR_Toolkit
         public GameObject GetVirtualTargetObject()
         {
             return positions[0].virtualPosition.gameObject;
+        }
+        
+        public Vector3 GetCurrentWarp()
+        {
+            return _currentWarp;
+        }
+
+        public void SetCurrentWarp(Vector3 warp)
+        {
+            _currentWarp = warp;
         }
 
         #endregion

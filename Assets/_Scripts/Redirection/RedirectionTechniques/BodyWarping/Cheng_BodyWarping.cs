@@ -76,6 +76,8 @@ namespace HR_Toolkit
             var w = a * _t + (1 - a) * _t0;
             // applay the warp to the virtual hand
             virtualHandPos.position = realHandPos.position + w;
+            target.SetCurrentWarp(w);
+            
         }
 
         public override void Init(RedirectionObject redirectionObject, Transform head, Vector3 warpOrigin)

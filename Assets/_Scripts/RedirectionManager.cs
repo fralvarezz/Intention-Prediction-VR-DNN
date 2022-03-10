@@ -157,6 +157,9 @@ namespace HR_Toolkit
 
             //apply redirection
             target.Redirect();
+            
+            //move target if needed
+            target.Follow();
 
         }
 
