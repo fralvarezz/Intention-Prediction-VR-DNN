@@ -1,0 +1,37 @@
+{
+    "name": "HTC.ViveHandTracking.Sample",
+    "references": [
+        "HTC.ViveHandTracking",
+        "Wave.Native",
+        "Unity.XR.Management"
+    ],
+    "includePlatforms": [
+        "Android",
+        "Editor",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.xr.management",
+            "expression": "3.0",
+            "define": "VIVEHANDTRACKING_UNITYXR"
+        },
+        {
+            "name": "com.htc.upm.wave.native",
+            "expression": "",
+            "define": "VIVEHANDTRACKING_WAVEXR_HAND"
+        },
+        {
+            "name": "com.htc.upm.wave.native",
+            "expression": "1.99",
+            "define": "VIVEHANDTRACKING_WAVEXR_HAND4"
+        }
+    ],
+    "noEngineReferences": false
+}
