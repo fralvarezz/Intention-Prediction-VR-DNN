@@ -8,6 +8,7 @@ TagManager:
   - virtualTarget
   - virtualHand
   - realHand
+  - LookableObject
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Virtual/Hand
   - Virtual/Object
   - Visualization
-  - 
+  - LookableObject
   - 
   - 
   - 
