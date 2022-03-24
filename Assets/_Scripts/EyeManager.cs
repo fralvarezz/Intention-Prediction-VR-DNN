@@ -12,17 +12,26 @@ public class EyeManager : MonoBehaviour
     private bool eye_callback_registered = false;
     private FocusInfo FocusInfo;
     private readonly float MaxDistance = 20;
+    public EyeLogger eyeLogger;
+    public LayerMask lookableObjectLayer;
+    public string lookableObjectTag;
 
-    // Start is called before the first frame update
+    private Vector3 _gazeVector; //normalized
+    private Vector3 _gazePoint;
+    private string _gazeObjectName;
+
+    private bool _started;
+
     void Start()
     {
         if (!SRanipal_Eye_Framework.Instance.EnableEye)
         {
             enabled = false;
-        }   
+        }
+
+        _started = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (SRanipal_Eye_Framework.Status != SRanipal_Eye_Framework.FrameworkStatus.WORKING &&
@@ -39,31 +48,75 @@ public class EyeManager : MonoBehaviour
             eye_callback_registered = false;
         }
         
-        Ray GazeRay;
-        int lookableObjectLayer = LayerMask.NameToLayer("LookableObject");
+        //If we are getting eye data from the callback instead of Update, halt Update()
+        if(SRanipal_Eye_Framework.Instance.EnableEyeDataCallback)
+            return;
+        
+        //Initialize values
+        //TODO: what do we do with these values where no collider is hit by the ray?
+        _gazePoint = Vector3.positiveInfinity;
+        _gazeObjectName = "";
+
+        //Gets the Gaze Ray
+        SRanipal_Eye.GetVerboseData(out var data);
+        _gazeVector = data.combined.eye_data.gaze_direction_normalized;
+        
+        //Casts the Gaze Ray casted and returns the position of the object hit
+        Ray gazeRay;
         bool eye_focus;
         if (eye_callback_registered)
-            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out GazeRay, out FocusInfo, 0, MaxDistance, (1 << lookableObjectLayer), eyeData);
+            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out gazeRay, out FocusInfo, 0, MaxDistance, lookableObjectLayer, eyeData);
         else
-            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out GazeRay, out FocusInfo, 0, MaxDistance, (1 << lookableObjectLayer));
-
+            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out gazeRay, out FocusInfo, 0, MaxDistance, lookableObjectLayer);
+        
         if (eye_focus)
         {
-            Debug.Log(FocusInfo.point);
-            
-            if (FocusInfo.transform.gameObject.CompareTag("LookableObject"))
+            if (FocusInfo.transform.gameObject.CompareTag(lookableObjectTag))
             {
-                FocusInfo.transform.GetComponent<CubeRayChecker>().OnHit();
+                _gazePoint = FocusInfo.transform.position;
+                _gazeObjectName = FocusInfo.transform.name;
             }
-            //FocusInfo.transform.GetComponent<CubeRayChecker>();
-            //DartBoard dartBoard = FocusInfo.transform.GetComponent<DartBoard>();
-            //if (dartBoard != null) dartBoard.Focus(FocusInfo.point);
         }
+        
+        eyeLogger.Log(_gazeVector, _gazePoint, _gazeObjectName);
+        
+        //if(_gazeObjectName != "")
+            //Debug.Log($"From EyeManager UPDATE(), logging {_gazeVector}, {_gazePoint}, {_gazeObjectName}");
+        
     }
     
-    private static void EyeCallback(ref EyeData eye_data)
+    private void EyeCallback(ref EyeData eye_data)
     {
-        eyeData = eye_data;
+        /*if(!SRanipal_Eye_Framework.Instance.EnableEyeDataCallback || !_started)
+            return;
+        
+        //Initialize values
+        _gazePoint = Vector3.positiveInfinity;
+        _gazeObjectName = "";
+
+        //Gets the Gaze Ray
+        _gazeVector = eye_data.verbose_data.combined.eye_data.gaze_direction_normalized;
+        
+        //Casts the Gaze Ray casted and returns the position of the object hit
+        Ray gazeRay;
+        bool eye_focus;
+        if (eye_callback_registered)
+            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out gazeRay, out FocusInfo, 0, MaxDistance, lookableObjectLayer, eyeData);
+        else
+            eye_focus = SRanipal_Eye.Focus(GazeIndex.COMBINE, out gazeRay, out FocusInfo, 0, MaxDistance, lookableObjectLayer);
+        
+        if (eye_focus)
+        {
+            if (FocusInfo.transform.gameObject.CompareTag(lookableObjectTag))
+            {
+                _gazePoint = FocusInfo.transform.position;
+                _gazeObjectName = FocusInfo.transform.name;
+            }
+        }
+        
+        if(_gazeObjectName != "")
+            Debug.Log($"From EyeManager CALLBACK, logging {_gazeVector}, {_gazePoint}, {_gazeObjectName}");
+        */
     }
     
 }
