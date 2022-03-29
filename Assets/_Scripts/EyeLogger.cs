@@ -70,6 +70,9 @@ public class EyeLogger : MonoBehaviour
                          "Gaze Position;" +
                          "Gaze Object Tag;"
                          );
+        //gaze position in pixel space
+        //(dont collect yet) object position
+        
     }
     
     private void OnApplicationQuit()

@@ -14,7 +14,9 @@ public class Predictor : MonoBehaviour
 
     private Model _runtimeModel;
 
-    private IWorker _engine;
+    private IWorker _worker;
+
+    private Dictionary<string, Tensor> inputs;
 
     /// <summary>
     /// A struct used for holding the results of our prediction in a way that's easy for us to view from the inspector.
@@ -41,11 +43,13 @@ public class Predictor : MonoBehaviour
     
     void Start()
     {
-        // Set up the runtime model and worker.
+        // Load the model and make a worker
         _runtimeModel = ModelLoader.Load(modelAsset);
-        _engine = WorkerFactory.CreateWorker(_runtimeModel, WorkerFactory.Device.GPU);
+        _worker = WorkerFactory.CreateWorker(_runtimeModel, WorkerFactory.Device.GPU);
+        
         // Instantiate our prediction struct.
         prediction = new Prediction();
+        inputs = new Dictionary<string, Tensor>();
     }
 
     void Update()
@@ -55,21 +59,65 @@ public class Predictor : MonoBehaviour
             // making a tensor out of a grayscale texture
             var channelCount = 1; //grayscale, 3 = color, 4 = color+alpha
             // Create a tensor for input from the texture.
-            print(_runtimeModel.layout);
+            //print(_runtimeModel.layout);
+            
+            FlipTexture(ref texture);
             var inputX = new Tensor(texture, channelCount);
             inputX = inputX.Reshape(new TensorShape(1,1,28,28));
+
+            /*for (int i = 0; i < 28; i++)
+            {
+                for (int j = 0; j < 28; j++)
+                {
+                    print(inputX[0,0,i,j] + " " + i + " " + j);
+                }
+            }*/
+
+            /*inputs["texture"] = inputX;
+            foreach (var m in _runtimeModel.memories)
+            {
+                Tensor memory = new Tensor(m.shape);
+                inputs.Add(m.input, memory);
+            }*/
+            
+            /*
+            //var newX = new Tensor(new int[]{inputX[1], })
+            var tore = inputX.ToReadOnlyArray();
+
+            var width = new float[inputX.width];
+            var channels = new float[inputX.channels];
+            for (int i = 0; i < inputX.channels; i++)
+            {
+                channels[i] = inputX[0,0,0,i];
+                width[i] = inputX[0, 0, i, 0];
+            }
+
+            for (int i = 0; i < inputX.channels; i++)
+            {
+                print(channels[i]);
+                print(width[i]);
+            }
+
+            var inputY = new Tensor(1, 1, 28, 28);
+            
+            for (int i = 0; i < inputX.channels; i++)
+            {
+                (inputY[0,0,0,i], inputY[0, 0, i, 0]) = (inputX[0, 0, i, 0], inputX[0,0,0,i]);
+            }*/
+            
+            //inputY[0,0,0,0]
             
             var dummyAcceptedInput = new Tensor(1, 1, 28, 28); //random data that doesn't throw errors
-            print(inputX.flatHeight);
-            print(inputX.flatWidth);
-            print(inputX.shape);
+            //print(inputX.flatHeight);
+            //print(inputX.flatWidth);
+            //print(inputX.shape);
             
-            print(dummyAcceptedInput.flatHeight);
-            print(dummyAcceptedInput.flatWidth);
-            print(dummyAcceptedInput.shape);
+            //print(dummyAcceptedInput.flatHeight);
+            //print(dummyAcceptedInput.flatWidth);
+            //print(dummyAcceptedInput.shape);
 
             // Peek at the output tensor without copying it.
-            Tensor outputY = _engine.Execute(inputX).PeekOutput();
+            Tensor outputY = _worker.Execute(inputX).PeekOutput();
             // Set the values of our prediction struct using our output tensor.
             prediction.SetPrediction(outputY);
             
@@ -81,6 +129,25 @@ public class Predictor : MonoBehaviour
     private void OnDestroy()
     {
         // Dispose of the engine manually (not garbage-collected).
-        _engine?.Dispose();
+        _worker?.Dispose();
+    }
+    
+    public static void FlipTexture(ref Texture2D texture)
+    {
+        int textureWidth = texture.width;
+        int textureHeight = texture.height;
+ 
+        Color32[] pixels = texture.GetPixels32();
+ 
+        for (int y = 0; y < textureHeight; y++)
+        {
+            int yo = y * textureWidth;
+            for (int il = yo, ir = yo + textureWidth - 1; il < ir; il++, ir--)
+            {
+                (pixels[il], pixels[ir]) = (pixels[ir], pixels[il]);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
     }
 }
