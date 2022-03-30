@@ -61,17 +61,21 @@ public class Predictor : MonoBehaviour
             // Create a tensor for input from the texture.
             //print(_runtimeModel.layout);
             
-            FlipTexture(ref texture);
+            //FlipTexture(ref texture);
+            
+            
             var inputX = new Tensor(texture, channelCount);
             inputX = inputX.Reshape(new TensorShape(1,1,28,28));
+            Tensor newTensor = new Tensor(1, 1, 28, 28);
 
-            /*for (int i = 0; i < 28; i++)
+            for (int i = 0; i < 28; i++)
             {
                 for (int j = 0; j < 28; j++)
                 {
                     print(inputX[0,0,i,j] + " " + i + " " + j);
+                    newTensor[0, 0, i, j] = inputX[0, 0, j, i];
                 }
-            }*/
+            }
 
             /*inputs["texture"] = inputX;
             foreach (var m in _runtimeModel.memories)
@@ -107,7 +111,6 @@ public class Predictor : MonoBehaviour
             
             //inputY[0,0,0,0]
             
-            var dummyAcceptedInput = new Tensor(1, 1, 28, 28); //random data that doesn't throw errors
             //print(inputX.flatHeight);
             //print(inputX.flatWidth);
             //print(inputX.shape);
@@ -117,12 +120,12 @@ public class Predictor : MonoBehaviour
             //print(dummyAcceptedInput.shape);
 
             // Peek at the output tensor without copying it.
-            Tensor outputY = _worker.Execute(inputX).PeekOutput();
+            Tensor outputY = _worker.Execute(newTensor).PeekOutput();
             // Set the values of our prediction struct using our output tensor.
             prediction.SetPrediction(outputY);
             
             // Dispose of the input tensor manually (not garbage-collected).
-            inputX.Dispose();
+            newTensor.Dispose();
         }
     }
 
