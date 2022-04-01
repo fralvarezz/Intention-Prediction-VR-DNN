@@ -19,7 +19,7 @@ public class Predictor : MonoBehaviour
     private Dictionary<string, Tensor> inputs;
 
     /// <summary>
-    /// A struct used for holding the results of our prediction in a way that's easy for us to view from the inspector.
+    /// A struct used for holding the results of our prediction in a way that's easy to view from the inspector.
     /// </summary>
     [Serializable]
     public struct Prediction
@@ -47,7 +47,7 @@ public class Predictor : MonoBehaviour
         _runtimeModel = ModelLoader.Load(modelAsset);
         _worker = WorkerFactory.CreateWorker(_runtimeModel, WorkerFactory.Device.GPU);
         
-        // Instantiate our prediction struct.
+        // Instantiate the prediction struct.
         prediction = new Prediction();
         inputs = new Dictionary<string, Tensor>();
     }
@@ -57,70 +57,27 @@ public class Predictor : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // making a tensor out of a grayscale texture
-            var channelCount = 1; //grayscale, 3 = color, 4 = color+alpha
+            var channelCount = 1; //1 = grayscale, 3 = color, 4 = color+alpha
             // Create a tensor for input from the texture.
-            //print(_runtimeModel.layout);
-            
-            //FlipTexture(ref texture);
-            
-            
             var inputX = new Tensor(texture, channelCount);
+            
+            //Reshape tht Tensor to 1x28x28
             inputX = inputX.Reshape(new TensorShape(1,1,28,28));
+
+            //Figured out that w and c have to be inverted. There is no tensor transpose so I do it manually here.
             Tensor newTensor = new Tensor(1, 1, 28, 28);
 
             for (int i = 0; i < 28; i++)
             {
                 for (int j = 0; j < 28; j++)
                 {
-                    print(inputX[0,0,i,j] + " " + i + " " + j);
                     newTensor[0, 0, i, j] = inputX[0, 0, j, i];
                 }
             }
 
-            /*inputs["texture"] = inputX;
-            foreach (var m in _runtimeModel.memories)
-            {
-                Tensor memory = new Tensor(m.shape);
-                inputs.Add(m.input, memory);
-            }*/
-            
-            /*
-            //var newX = new Tensor(new int[]{inputX[1], })
-            var tore = inputX.ToReadOnlyArray();
-
-            var width = new float[inputX.width];
-            var channels = new float[inputX.channels];
-            for (int i = 0; i < inputX.channels; i++)
-            {
-                channels[i] = inputX[0,0,0,i];
-                width[i] = inputX[0, 0, i, 0];
-            }
-
-            for (int i = 0; i < inputX.channels; i++)
-            {
-                print(channels[i]);
-                print(width[i]);
-            }
-
-            var inputY = new Tensor(1, 1, 28, 28);
-            
-            for (int i = 0; i < inputX.channels; i++)
-            {
-                (inputY[0,0,0,i], inputY[0, 0, i, 0]) = (inputX[0, 0, i, 0], inputX[0,0,0,i]);
-            }*/
-            
-            //inputY[0,0,0,0]
-            
-            //print(inputX.flatHeight);
-            //print(inputX.flatWidth);
-            //print(inputX.shape);
-            
-            //print(dummyAcceptedInput.flatHeight);
-            //print(dummyAcceptedInput.flatWidth);
-            //print(dummyAcceptedInput.shape);
-
             // Peek at the output tensor without copying it.
             Tensor outputY = _worker.Execute(newTensor).PeekOutput();
+            
             // Set the values of our prediction struct using our output tensor.
             prediction.SetPrediction(outputY);
             
