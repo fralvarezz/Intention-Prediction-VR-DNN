@@ -36,9 +36,20 @@ public class EyeLogger : MonoBehaviour
     
     private static EyeLogger _instance;
 
+    private Dictionary<String, int> tagToIntDict = new Dictionary<string, int>()
+    {
+        {"None", 0},
+        {"Object1", 1},
+        {"Object2", 2},
+        {"Object3", 3},
+        {"Object4", 4},
+    };
+
     public static EyeLogger Instance { get { return _instance; } }
 
-    private int _logIndex;
+    private int logIndex;
+
+    private int currentFrame = 0;
 
 
     private void Awake()
@@ -53,9 +64,10 @@ public class EyeLogger : MonoBehaviour
     
     void Start()
     {
-        _logIndex = PlayerPrefs.GetInt("Index", 0);
-        _logIndex++;
-        PlayerPrefs.SetInt("Index", _logIndex);
+        logIndex = PlayerPrefs.GetInt("Index", 0);
+        logIndex++;
+        PlayerPrefs.SetInt("Index", logIndex);
+        currentFrame = 0;
         
         writer = new StreamWriter(GetPath());
         
@@ -91,6 +103,8 @@ public class EyeLogger : MonoBehaviour
 
         if(!logging)
             return;
+
+        currentFrame++;
     }
 
     public void Log(Vector3 gazeVec, Vector3 gazePt, string gazeObj)
@@ -99,11 +113,12 @@ public class EyeLogger : MonoBehaviour
         gazePoint = gazePt;
         gazeObjectTag = gazeObj;
         
-        Debug.Log(gazeObj);
+        Debug.Log("Logged gaze object is: " + gazeObj);
         
         if(!logging)
             return;
         
+        //TODO: convert Vector3 to 3 individual values?
         writer.WriteLine(frame + ";" +
                          time + " " + time.Millisecond + ";" +
                          playerPosition.ToString("N4") + ";" +
@@ -114,7 +129,8 @@ public class EyeLogger : MonoBehaviour
                          leftHandRotation.ToString("N4") + ";" +
                          gazeVector.ToString("N4") + ";" +
                          gazePoint.ToString("N4") + ";" +
-                         gazeObjectTag + ";" +
+                         gazeObjectTag + ";" + //probably replace this with tagToInt
+                         //TagToInt(gazeObjectTag) + ";" +
                          Camera.main.WorldToScreenPoint(gazePoint) + ";" //compare this to WorldToScreenVR. Not sure which one works or doesn't.
                          //WorldToScreenVR(Camera.main, gazePoint) + ";"
         );
@@ -137,7 +153,7 @@ public class EyeLogger : MonoBehaviour
     private string GetPath()
     {
 #if UNITY_EDITOR
-        return Application.dataPath + $"/eyeLog_{_logIndex}.csv";
+        return Application.dataPath + $"/eyeLog_{logIndex}.csv";
 #endif
     }
     
@@ -159,5 +175,13 @@ public class EyeLogger : MonoBehaviour
         screenPoint.y = (screenPoint.y - 0.15f * XRSettings.eyeTextureHeight) / 0.7f;
 
         return screenPoint;
+    }
+
+    private int TagToInt(string objectTag)
+    {
+        if (!tagToIntDict.ContainsKey(objectTag))
+            throw new Exception($"{objectTag} not available in tags dictionary");
+
+        return tagToIntDict[objectTag];
     }
 }
