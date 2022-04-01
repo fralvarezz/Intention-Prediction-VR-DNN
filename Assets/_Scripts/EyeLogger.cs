@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class EyeLogger : MonoBehaviour
 {
@@ -68,7 +69,8 @@ public class EyeLogger : MonoBehaviour
                          "Left Hand Rotation;" +
                          "Gaze Vector;" +
                          "Gaze Position;" +
-                         "Gaze Object Tag;"
+                         "Gaze Object Tag;" + 
+                         "Gaze Position Pixel Space"
                          );
         //gaze position in pixel space
         //(dont collect yet) object position
@@ -112,8 +114,10 @@ public class EyeLogger : MonoBehaviour
                          leftHandRotation.ToString("N4") + ";" +
                          gazeVector.ToString("N4") + ";" +
                          gazePoint.ToString("N4") + ";" +
-                         gazeObjectTag + ";"
-                         );
+                         gazeObjectTag + ";" +
+                         Camera.main.WorldToScreenPoint(gazePoint) + ";" //compare this to WorldToScreenVR. Not sure which one works or doesn't.
+                         //WorldToScreenVR(Camera.main, gazePoint) + ";"
+        );
     }
 
     private void UpdateValues()
@@ -135,5 +139,25 @@ public class EyeLogger : MonoBehaviour
 #if UNITY_EDITOR
         return Application.dataPath + $"/eyeLog_{_logIndex}.csv";
 #endif
+    }
+    
+    /// <summary>
+    /// Calculates screen-space position a world space object. Useful for showing something on screen that is not visible in VR.
+    /// For example, it can be used to update the position of a marker that highlights the gaze of the player, using eye tracking.
+    /// </summary>
+    /// <param name="camera">The camera used for VR rendering.</param>
+    /// <param name="worldPos">World position of a point.</param>
+    /// <returns>Screen position of a point.</returns>
+    static Vector2 WorldToScreenVR(Camera camera, Vector3 worldPos)
+    {
+        Vector3 screenPoint = camera.WorldToViewportPoint(worldPos);
+        float w = XRSettings.eyeTextureWidth;
+        float h = XRSettings.eyeTextureHeight;
+        float ar = w / h;
+
+        screenPoint.x = (screenPoint.x - 0.15f * XRSettings.eyeTextureWidth) / 0.7f;
+        screenPoint.y = (screenPoint.y - 0.15f * XRSettings.eyeTextureHeight) / 0.7f;
+
+        return screenPoint;
     }
 }
