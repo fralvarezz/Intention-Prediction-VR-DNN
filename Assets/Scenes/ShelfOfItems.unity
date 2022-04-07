@@ -273,6 +273,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallShelf (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_TagString
+      value: Shelf
+      objectReference: {fileID: 0}
     - target: {fileID: 4733635178474736, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_RootOrder
       value: 26
@@ -1579,6 +1587,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallShelf (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_TagString
+      value: Shelf
+      objectReference: {fileID: 0}
     - target: {fileID: 4733635178474736, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_RootOrder
       value: 25
@@ -2716,6 +2732,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallShelf (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_TagString
+      value: Shelf
+      objectReference: {fileID: 0}
     - target: {fileID: 4733635178474736, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_RootOrder
       value: 23
@@ -2789,6 +2813,10 @@ PrefabInstance:
     - target: {fileID: 1789919243174566, guid: 21964305d01b6054290f08a48cc6ebab, type: 3}
       propertyPath: m_Name
       value: Glasses
+      objectReference: {fileID: 0}
+    - target: {fileID: 1789919243174566, guid: 21964305d01b6054290f08a48cc6ebab, type: 3}
+      propertyPath: m_TagString
+      value: LookableObject
       objectReference: {fileID: 0}
     - target: {fileID: 4876579594773664, guid: 21964305d01b6054290f08a48cc6ebab, type: 3}
       propertyPath: m_RootOrder
@@ -2880,6 +2908,7 @@ GameObject:
   - component: {fileID: 1315636271}
   - component: {fileID: 1315636272}
   - component: {fileID: 1315636273}
+  - component: {fileID: 1315636274}
   m_Layer: 0
   m_Name: Controller (right)
   m_TagString: Untagged
@@ -2948,6 +2977,19 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.2
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1315636274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1315636270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cd9f9c0c5100cb41ad3806919713735, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collidingWith: {fileID: 0}
 --- !u!1 &1327721977
 GameObject:
   m_ObjectHideFlags: 0
@@ -3312,6 +3354,14 @@ PrefabInstance:
     - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_Name
       value: WallShelf (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_TagString
+      value: Shelf
       objectReference: {fileID: 0}
     - target: {fileID: 4733635178474736, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_RootOrder
@@ -4135,6 +4185,7 @@ MonoBehaviour:
   booleanAction:
     actionPath: /actions/default/in/GrabPinch
     needsReinit: 0
+  handController: {fileID: 0}
 --- !u!4 &1966862810
 Transform:
   m_ObjectHideFlags: 0

@@ -10,11 +10,17 @@ public class HandController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if(!other.CompareTag("LookableObject"))
+            return;
+        
         collidingWith = other.gameObject;
     }
 
     private void OnTriggerExit(Collider other)
     {
+        if(!other.CompareTag("LookableObject"))
+            return;
+        
         collidingWith = null;
     }
 }

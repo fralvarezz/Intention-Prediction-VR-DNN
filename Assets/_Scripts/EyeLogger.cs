@@ -39,13 +39,18 @@ public class EyeLogger : MonoBehaviour
     
     private static EyeLogger _instance;
 
-    private Dictionary<String, int> tagToIntDict = new Dictionary<string, int>()
+    private Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
     {
         {"None", 0},
-        {"Object1", 1},
-        {"Object2", 2},
-        {"Object3", 3},
-        {"Object4", 4},
+        {"Poles", 1},
+        {"Helmet", 2},
+        {"Backpack", 3},
+        {"Phone", 4},
+        {"Float Ring", 5},
+        {"Glasses", 6},
+        {"Headphones", 7},
+        {"Snowboard", 8},
+        {"Bottle", 9}
     };
 
     public static EyeLogger Instance { get { return _instance; } }
@@ -235,10 +240,10 @@ public class EyeLogger : MonoBehaviour
     {
         //TODO: REMOVE THIS RETURN
         return 0;
-        if (!tagToIntDict.ContainsKey(objectTag))
+        if (!nameToIntDict.ContainsKey(objectTag))
             throw new Exception($"{objectTag} not available in tags dictionary");
 
-        return tagToIntDict[objectTag];
+        return nameToIntDict[objectTag];
     }
 
     public void SetInteractedObject(string objectTag)

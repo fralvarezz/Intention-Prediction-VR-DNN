@@ -71,7 +71,7 @@ public class EyeManager : MonoBehaviour
         
         if (eye_focus)
         {
-            if (FocusInfo.transform.gameObject.CompareTag(lookableObjectTag))
+            if (FocusInfo.transform.gameObject.CompareTag("LookableObject") || FocusInfo.transform.gameObject.CompareTag("Shelf"))
             {
                 _gazePoint = FocusInfo.transform.position;
                 _gazeObjectName = FocusInfo.transform.name;
