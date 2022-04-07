@@ -734,7 +734,7 @@ MonoBehaviour:
   eyeLogger: {fileID: 639316512}
   lookableObjectLayer:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 6144
   lookableObjectTag: LookableObject
 --- !u!4 &128258467
 Transform:
