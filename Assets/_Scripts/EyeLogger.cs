@@ -69,7 +69,7 @@ public class EyeLogger : MonoBehaviour
         PlayerPrefs.SetInt("Index", logIndex);
         currentFrame = 0;
         
-        writer = new StreamWriter(GetPath());
+        /*writer = new StreamWriter(GetPath());
         
         writer.WriteLine("Frame;" +
                          "Timestamp;" +
@@ -83,10 +83,15 @@ public class EyeLogger : MonoBehaviour
                          "Gaze Position;" +
                          "Gaze Object Tag;" + 
                          "Gaze Position Pixel Space"
-                         );
+                         );*/
+
+        string csv_header =
+            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag";
+
         //gaze position in pixel space
         //(dont collect yet) object position
-        
+        string t = GetLogAsString();
+        Debug.Log(t);
     }
     
     private void OnApplicationQuit()
@@ -149,6 +154,49 @@ public class EyeLogger : MonoBehaviour
         leftHandPosition = leftHand.transform.position;
         leftHandRotation = leftHand.transform.rotation;
     }
+
+    private Vector3 GetRelativePosition(Transform origin, Vector3 position)
+    {
+        Vector3 distance = position - origin.position;
+        Vector3 relativePosition = Vector3.zero;
+        relativePosition.x = Vector3.Dot(distance, origin.right.normalized);
+        relativePosition.y = Vector3.Dot(distance, origin.up.normalized);
+        relativePosition.z = Vector3.Dot(distance, origin.forward.normalized);
+
+        return relativePosition;
+    }
+
+    private string VecToStr(Vector3 vec)
+    {
+        return vec.x.ToString("N4") + DELIM + vec.y.ToString("N4") + DELIM + vec.z.ToString("N4") + DELIM;
+    }
+    
+    private static bool RELATIVE_POS = true;
+    private static string DELIM = ",";
+    string GetLogAsString()
+    {
+        string output = String.Empty;
+        //If we include the timestamp then uncomment below
+        output += frame + DELIM + time + " " + time.Millisecond + DELIM;
+        output += VecToStr(playerPosition);
+        output += VecToStr(player.transform.up);
+        //We focus only on right hand maybe?
+        if (RELATIVE_POS)
+        {
+            output += VecToStr(GetRelativePosition(player.transform, rightHandPosition));
+        }
+        else
+        {
+            output += VecToStr(rightHandPosition);
+        }
+
+        output += VecToStr(rightHand.transform.up);
+        
+        //TODO: Figure out if rightHandRotation needs to be relative or not
+        output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag);
+        return output;
+
+    }
     
     private string GetPath()
     {
@@ -179,6 +227,8 @@ public class EyeLogger : MonoBehaviour
 
     private int TagToInt(string objectTag)
     {
+        //TODO: REMOVE THIS RETURN
+        return 0;
         if (!tagToIntDict.ContainsKey(objectTag))
             throw new Exception($"{objectTag} not available in tags dictionary");
 
