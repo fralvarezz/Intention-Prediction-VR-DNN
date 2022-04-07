@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.XR;
+using Valve.VR;
 
 public class EyeLogger : MonoBehaviour
 {
@@ -33,6 +34,8 @@ public class EyeLogger : MonoBehaviour
     private Vector3 gazeVector;
     private Vector3 gazePoint;
     private string gazeObjectTag;
+
+    public string objectInteractedWith = "";
     
     private static EyeLogger _instance;
 
@@ -50,8 +53,7 @@ public class EyeLogger : MonoBehaviour
     private int logIndex;
 
     private int currentFrame = 0;
-
-
+    
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -86,7 +88,7 @@ public class EyeLogger : MonoBehaviour
                          );*/
 
         string csv_header =
-            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag";
+            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag,obj_interacted_with";
 
         //gaze position in pixel space
         //(dont collect yet) object position
@@ -139,6 +141,8 @@ public class EyeLogger : MonoBehaviour
                          Camera.main.WorldToScreenPoint(gazePoint) + ";" //compare this to WorldToScreenVR. Not sure which one works or doesn't.
                          //WorldToScreenVR(Camera.main, gazePoint) + ";"
         );
+
+        objectInteractedWith = "";
     }
 
     private void UpdateValues()
@@ -194,6 +198,8 @@ public class EyeLogger : MonoBehaviour
         
         //TODO: Figure out if rightHandRotation needs to be relative or not
         output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag);
+        output += objectInteractedWith; // save when a player interacts with an object, not fed to the NN
+        
         return output;
 
     }
@@ -233,5 +239,10 @@ public class EyeLogger : MonoBehaviour
             throw new Exception($"{objectTag} not available in tags dictionary");
 
         return tagToIntDict[objectTag];
+    }
+
+    public void SetInteractedObject(string objectTag)
+    {
+        objectInteractedWith = objectTag;
     }
 }
