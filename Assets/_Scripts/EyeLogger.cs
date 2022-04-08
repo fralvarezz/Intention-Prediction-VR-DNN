@@ -44,6 +44,7 @@ public class EyeLogger : MonoBehaviour
         {"None", 0},
         {"WallShelf", 0},
         {"", 0},
+        {"Wall", 0},
         {"Poles", 1},
         {"Helmet", 2},
         {"Backpack", 3},
