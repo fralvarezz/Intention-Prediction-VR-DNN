@@ -12,7 +12,7 @@ public class EyeLogger : MonoBehaviour
     
     // Stream Writer variables:
     private StreamWriter writer;
-    private int frame = 0;
+    private int currentFrame = 0;
     private DateTime time;
     
     //Player
@@ -56,8 +56,6 @@ public class EyeLogger : MonoBehaviour
     public static EyeLogger Instance { get { return _instance; } }
 
     private int logIndex;
-
-    private int currentFrame = 0;
     
     private void Awake()
     {
@@ -131,7 +129,7 @@ public class EyeLogger : MonoBehaviour
             return;
         
         //TODO: convert Vector3 to 3 individual values?
-        writer.WriteLine(frame + ";" +
+        writer.WriteLine(currentFrame + ";" +
                          time + " " + time.Millisecond + ";" +
                          playerPosition.ToString("N4") + ";" +
                          playerRotation.ToString("N4") + ";" +
@@ -186,7 +184,7 @@ public class EyeLogger : MonoBehaviour
     {
         string output = String.Empty;
         //If we include the timestamp then uncomment below
-        output += frame + DELIM + time + " " + time.Millisecond + DELIM;
+        output += currentFrame + DELIM + time + " " + time.Millisecond + DELIM;
         output += VecToStr(playerPosition);
         output += VecToStr(player.transform.up);
         //We focus only on right hand maybe?
