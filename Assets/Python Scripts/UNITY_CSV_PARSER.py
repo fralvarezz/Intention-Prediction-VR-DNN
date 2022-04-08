@@ -1,11 +1,14 @@
-import csv
+import numpy as np
 
-fname = "test.csv"
-filters = [""]
 
-#TODO: Filter out unnecessary fields
+class UnityParser:
+    def __init__(self, fname):
+        with open(file=fname, newline="") as f:
+            data = np.genfromtxt(f, usecols=(0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+                                 delimiter=",", skip_header=1)
+            self.data = data
 
-with open(file=fname, newline="") as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        print(row)
+    def __iter__(self):
+        for frame in self.data:
+            yield frame
+

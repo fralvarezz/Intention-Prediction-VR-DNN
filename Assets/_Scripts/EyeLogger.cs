@@ -74,9 +74,9 @@ public class EyeLogger : MonoBehaviour
         PlayerPrefs.SetInt("Index", logIndex);
         currentFrame = 0;
         
-        /*writer = new StreamWriter(GetPath());
+        writer = new StreamWriter(GetPath());
         
-        writer.WriteLine("Frame;" +
+        /*writer.WriteLine("Frame;" +
                          "Timestamp;" +
                          "Player Position;" +
                          "Player Rotation;" +
@@ -88,15 +88,15 @@ public class EyeLogger : MonoBehaviour
                          "Gaze Position;" +
                          "Gaze Object Tag;" + 
                          "Gaze Position Pixel Space"
-                         );*/
-
+                         );
+*/
         string csv_header =
-            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag,obj_interacted_with";
-
+            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag,obj_interacted_with,gaze_to_screen_x,gaze_to_screen_y,gaze_to_screen_z,obj_interacted_with";
+        
+        writer.WriteLine(csv_header);
+        
         //gaze position in pixel space
         //(dont collect yet) object position
-        string t = GetLogAsString();
-        Debug.Log(t);
     }
     
     private void OnApplicationQuit()
@@ -129,7 +129,7 @@ public class EyeLogger : MonoBehaviour
             return;
         
         //TODO: convert Vector3 to 3 individual values?
-        writer.WriteLine(currentFrame + ";" +
+        /*writer.WriteLine(currentFrame + ";" +
                          time + " " + time.Millisecond + ";" +
                          playerPosition.ToString("N4") + ";" +
                          playerRotation.ToString("N4") + ";" +
@@ -143,9 +143,14 @@ public class EyeLogger : MonoBehaviour
                          //TagToInt(gazeObjectTag) + ";" +
                          Camera.main.WorldToScreenPoint(gazePoint) + ";" //compare this to WorldToScreenVR. Not sure which one works or doesn't.
                          //WorldToScreenVR(Camera.main, gazePoint) + ";"
-        );
+        );*/
 
+        writer.WriteLine(GetLogAsString());
+        
         objectInteractedWith = "";
+        
+        
+        
     }
 
     private void UpdateValues()
@@ -200,7 +205,8 @@ public class EyeLogger : MonoBehaviour
         output += VecToStr(rightHand.transform.up);
         
         //TODO: Figure out if rightHandRotation needs to be relative or not
-        output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag);
+        output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag) + DELIM;
+        output += VecToStr(Camera.main.WorldToScreenPoint(gazePoint));
         output += objectInteractedWith; // save when a player interacts with an object, not fed to the NN
         
         return output;
@@ -236,8 +242,6 @@ public class EyeLogger : MonoBehaviour
 
     private int TagToInt(string objectTag)
     {
-        //TODO: REMOVE THIS RETURN
-        return 0;
         if (!nameToIntDict.ContainsKey(objectTag))
             throw new Exception($"{objectTag} not available in tags dictionary");
 
