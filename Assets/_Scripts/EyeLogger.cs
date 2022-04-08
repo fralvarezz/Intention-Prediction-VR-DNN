@@ -42,6 +42,8 @@ public class EyeLogger : MonoBehaviour
     private Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
     {
         {"None", 0},
+        {"WallShelf", 0},
+        {"", 0},
         {"Poles", 1},
         {"Helmet", 2},
         {"Backpack", 3},
@@ -107,9 +109,16 @@ public class EyeLogger : MonoBehaviour
     void Update()
     {
         UpdateValues();
-        
+
         if (Input.GetKeyDown(KeyCode.Space))
+        {
             logging = !logging;
+
+            if(logging)
+                Debug.Log("Logging started!");
+            else
+                Debug.Log("Logging finished!");
+        }
 
         if(!logging)
             return;
@@ -123,12 +132,11 @@ public class EyeLogger : MonoBehaviour
         gazePoint = gazePt;
         gazeObjectTag = gazeObj;
         
-        Debug.Log("Logged gaze object is: " + gazeObj);
+        //Debug.Log("Logged gaze object is: " + gazeObj);
         
         if(!logging)
             return;
         
-        //TODO: convert Vector3 to 3 individual values?
         /*writer.WriteLine(currentFrame + ";" +
                          time + " " + time.Millisecond + ";" +
                          playerPosition.ToString("N4") + ";" +
@@ -148,9 +156,7 @@ public class EyeLogger : MonoBehaviour
         writer.WriteLine(GetLogAsString());
         
         objectInteractedWith = "";
-        
-        
-        
+
     }
 
     private void UpdateValues()
@@ -207,7 +213,7 @@ public class EyeLogger : MonoBehaviour
         //TODO: Figure out if rightHandRotation needs to be relative or not
         output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag) + DELIM;
         output += VecToStr(Camera.main.WorldToScreenPoint(gazePoint));
-        output += objectInteractedWith; // save when a player interacts with an object, not fed to the NN
+        output += TagToInt(objectInteractedWith); // save when a player interacts with an object, not fed to the NN
         
         return output;
 
@@ -250,6 +256,7 @@ public class EyeLogger : MonoBehaviour
 
     public void SetInteractedObject(string objectTag)
     {
+        Debug.Log("Setting interacted object: " + objectTag);
         objectInteractedWith = objectTag;
     }
 }
