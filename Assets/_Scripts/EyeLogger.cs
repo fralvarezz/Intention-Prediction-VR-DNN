@@ -190,7 +190,7 @@ public class EyeLogger : MonoBehaviour
     }
     
     private static bool RELATIVE_POS = true;
-    private static string DELIM = ",";
+    private static string DELIM = ";";
     string GetLogAsString()
     {
         string output = String.Empty;
