@@ -1,7 +1,13 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 # Device configuration
+import torchvision
+import torchvision.transforms as transforms
+
+import UNITY_CSV_PARSER
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
@@ -45,28 +51,51 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-#TODO: Finish below
+up = UNITY_CSV_PARSER.UnityParser("success1.csv")
+up.update_label_frames(225)
+#data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
-n_total_steps = len(train_loader)
+# TODO: Finish below
+
+n_total_steps = 10000
 for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
+    i = 0
+    j = i+5
+    n = len(up)
+    while j < n:
+        batch = up.get_batch(i, j)
+
+        # [1, 5, 20]
+
         # origin shape: [N, 1, 28, 28]
         # resized: [N, 28, 28]
-        images = images.reshape(-1, sequence_length, input_size).to(device)
-        labels = labels.to(device)
+        batch_no_labels = batch[:, :-1]
+        labels = batch[:, [-1]]
+
+        batch_no_labels = torch.from_numpy(batch_no_labels)
+        labels = torch.from_numpy(labels)
+
+        batch_no_labels = batch_no_labels.reshape(1, 5, 20)
+
+        print(batch_no_labels.shape)
+        print(labels.shape)
+        #batch = batch.reshape(-1, sequence_length, input_size).to(device)
+        #label = frame[-1]
+        #label = label.to(device)
 
         # Forward pass
-        outputs = model(images)
-        loss = criterion(outputs, labels)
+        #outputs = model(images)
+        #loss = criterion(outputs, labels)
 
         # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        #optimizer.zero_grad()
+        #loss.backward()
+        #optimizer.step()
 
-        if (i + 1) % 100 == 0:
-            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
+        #if (i + 1) % 100 == 0:
+        #    print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
 
+'''
 # Test the model
 # In test phase, we don't need to compute gradients (for memory efficiency)
 with torch.no_grad():
@@ -90,5 +119,6 @@ torch.onnx.export(model, x, "../NN_Models/model.onnx",
 
 
 #if __name__ == '__main__':
-#    pass
 
+
+'''
