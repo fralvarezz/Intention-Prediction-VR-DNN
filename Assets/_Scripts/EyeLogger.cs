@@ -93,13 +93,45 @@ public class EyeLogger : MonoBehaviour
                          "Gaze Position Pixel Space"
                          );
 */
-        string csv_header =
-            "frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag,obj_interacted_with,gaze_to_screen_x,gaze_to_screen_y,gaze_to_screen_z,obj_interacted_with";
+        string csvHeader =
+            "frame" + DELIM +
+            
+            "time" + DELIM +
+            
+            "player_pos_x" + DELIM +
+            "player_pos_y" + DELIM +
+            "player_pos_z" + DELIM +
+            
+            "player_up_x" + DELIM +
+            "player_up_y" + DELIM +
+            "player_up_z" + DELIM +
+            
+            "rel_r_hand_x" + DELIM +
+            "rel_r_hand_y" + DELIM +
+            "rel_r_hand_z" + DELIM +
+            
+            "r_hand_up_x" + DELIM +
+            "r_hand_up_y" + DELIM +
+            "r_hand_up_z" + DELIM +
+            
+            "gaze_vec_x" + DELIM +
+            "gaze_vec_y" + DELIM +
+            "gaze_vec_z" + DELIM +
+            
+            "gaze_p_x" + DELIM +
+            "gaze_p_y" + DELIM +
+            "gaze_p_z" + DELIM +
+            
+            "obj_tag" + DELIM +
+            
+            "gaze_to_screen_x" + DELIM +
+            "gaze_to_screen_y" + DELIM +
+            "gaze_to_screen_z" + DELIM +
+            
+            "obj_interacted_with";
         
-        writer.WriteLine(csv_header);
+        writer.WriteLine(csvHeader);
         
-        //gaze position in pixel space
-        //(dont collect yet) object position
     }
     
     private void OnApplicationQuit()
@@ -137,22 +169,6 @@ public class EyeLogger : MonoBehaviour
         
         if(!logging)
             return;
-        
-        /*writer.WriteLine(currentFrame + ";" +
-                         time + " " + time.Millisecond + ";" +
-                         playerPosition.ToString("N4") + ";" +
-                         playerRotation.ToString("N4") + ";" +
-                         rightHandPosition.ToString("N4") + ";" +
-                         rightHandRotation.ToString("N4") + ";" +
-                         leftHandPosition.ToString("N4") + ";" +
-                         leftHandRotation.ToString("N4") + ";" +
-                         gazeVector.ToString("N4") + ";" +
-                         gazePoint.ToString("N4") + ";" +
-                         gazeObjectTag + ";" + //probably replace this with tagToInt
-                         //TagToInt(gazeObjectTag) + ";" +
-                         Camera.main.WorldToScreenPoint(gazePoint) + ";" //compare this to WorldToScreenVR. Not sure which one works or doesn't.
-                         //WorldToScreenVR(Camera.main, gazePoint) + ";"
-        );*/
 
         writer.WriteLine(GetLogAsString());
         
@@ -192,6 +208,7 @@ public class EyeLogger : MonoBehaviour
     
     private static bool RELATIVE_POS = true;
     private static string DELIM = ";";
+    
     string GetLogAsString()
     {
         string output = String.Empty;
@@ -199,6 +216,7 @@ public class EyeLogger : MonoBehaviour
         output += currentFrame + DELIM + time + " " + time.Millisecond + DELIM;
         output += VecToStr(playerPosition);
         output += VecToStr(player.transform.up);
+        
         //We focus only on right hand maybe?
         if (RELATIVE_POS)
         {

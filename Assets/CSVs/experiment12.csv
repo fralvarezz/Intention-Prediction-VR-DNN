@@ -1,4 +1,4 @@
-frame,time,player_pos_x,player_pos_y,player_pos_z,player_up_x,player_up_y,player_up_z,rel_r_hand_x,rel_r_hand_y,rel_r_hand_z,r_hand_up_x,r_hand_up_y,r_hand_up_z,gaze_vec_x,gaze_vec_y,gaze_vec_z,gaze_p_x,gaze_p_y,gaze_p_z,obj_tag,obj_interacted_with,gaze_to_screen_x,gaze_to_screen_y,gaze_to_screen_z,obj_interacted_with
+frame;time;player_pos_x;player_pos_y;player_pos_z;player_up_x;player_up_y;player_up_z;rel_r_hand_x;rel_r_hand_y;rel_r_hand_z;r_hand_up_x;r_hand_up_y;r_hand_up_z;gaze_vec_x;gaze_vec_y;gaze_vec_z;gaze_p_x;gaze_p_y;gaze_p_z;obj_tag;gaze_to_screen_x;gaze_to_screen_y;gaze_to_screen_z;obj_interacted_with
 1;08-04-2022 18:39:16 618;-2,0517;1,3756;1,2591;0,0322;0,9979;-0,0556;0,1761;-0,6630;0,3720;0,3680;0,9234;0,1091;-1,0000;-1,0000;-1,0000;Infinity;Infinity;Infinity;0;NaN;NaN;Infinity;5
 2;08-04-2022 18:39:16 636;-2,0515;1,3758;1,2587;0,0315;0,9978;-0,0583;0,1736;-0,6643;0,3711;0,3673;0,9235;0,1107;-1,0000;-1,0000;-1,0000;Infinity;Infinity;Infinity;0;NaN;NaN;Infinity;0
 3;08-04-2022 18:39:16 647;-2,0515;1,3759;1,2586;0,0312;0,9977;-0,0603;0,1727;-0,6653;0,3701;0,3668;0,9236;0,1113;0,0103;-0,0782;0,9969;-2,5000;0,0000;2,5000;0;796,6097;-9,9158;1,1334;0
