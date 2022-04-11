@@ -11,14 +11,14 @@ import UNITY_CSV_PARSER
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
-# num_classes = num of tags?
-num_classes = 9
+# num_classes = num of items
+num_classes = 10  # 9 items and None
 num_epochs = 2
-batch_size = 100
+batch_size = 1
 learning_rate = 0.001
 
-input_size = 17
-sequence_length = 28
+input_size = 19  # num of inputs per frame
+sequence_length = 1  # num of frames at a time, I believe
 hidden_size = 128
 num_layers = 1
 
@@ -28,13 +28,13 @@ class RNN_LSTM(nn.Module):
         super(RNN_LSTM, self).__init__()
         self.hidden_size = _hidden_size
         self.num_layers = _num_layers
-        self.lstm = nn.LSTM(_input_size, _hidden_size, _num_layers, batch_first=True)
-        self.fc = nn.Linear(_hidden_size * sequence_length, _num_classes)
+        self.lstm = nn.LSTM(_input_size, _hidden_size, _num_layers, batch_first=True, dtype=torch.float32)
+        self.fc = nn.Linear(_hidden_size * sequence_length, _num_classes, dtype=torch.float32)
 
     def forward(self, x):
         # Set initial hidden and cell states
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32).to(device)
+        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32).to(device)
 
         # Forward propagate LSTM
         out, _ = self.lstm(
@@ -51,49 +51,53 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-up = UNITY_CSV_PARSER.UnityParser("success1.csv")
-up.update_label_frames(225)
-#data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv")
+
+frames_to_backlabel = 225
+up.update_label_frames(frames_to_backlabel)
+# data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
 
-n_total_steps = 10000
+n_total_steps = len(up.data)/sequence_length
+
 for epoch in range(num_epochs):
     i = 0
-    j = i+5
+    j = i + sequence_length
     n = len(up)
+
+    if j > n:
+        j = n - 1
+
     while j < n:
-        batch = up.get_batch(i, j)
+        frames_batch = up.get_batch(i, j)
 
-        # [1, 5, 20]
+        frames_batch_no_labels = frames_batch[:, :-1]
+        labels = frames_batch[:, -1]
 
-        # origin shape: [N, 1, 28, 28]
-        # resized: [N, 28, 28]
-        batch_no_labels = batch[:, :-1]
-        labels = batch[:, [-1]]
+        frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
+        labels = torch.from_numpy(labels).to(device)
+        labels = labels.type(torch.LongTensor).to(device)
 
-        batch_no_labels = torch.from_numpy(batch_no_labels)
-        labels = torch.from_numpy(labels)
+        frames_batch_no_labels = frames_batch_no_labels.reshape(batch_size, sequence_length, input_size)
 
-        batch_no_labels = batch_no_labels.reshape(1, 5, 20)
-
-        print(batch_no_labels.shape)
-        print(labels.shape)
-        #batch = batch.reshape(-1, sequence_length, input_size).to(device)
-        #label = frame[-1]
-        #label = label.to(device)
+        # frames_batch shape is [batch_size, sequence_length, input_size]
 
         # Forward pass
-        #outputs = model(images)
-        #loss = criterion(outputs, labels)
+
+        outputs = model(frames_batch_no_labels)
+        loss = criterion(outputs, labels)
 
         # Backward and optimize
-        #optimizer.zero_grad()
-        #loss.backward()
-        #optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-        #if (i + 1) % 100 == 0:
-        #    print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{i + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
+        i += sequence_length
+        j += sequence_length
+
+        if (j + 1) % 100 == 0:
+            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
 
 '''
 # Test the model
