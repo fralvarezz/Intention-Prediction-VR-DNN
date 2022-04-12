@@ -8,7 +8,13 @@ using Valve.VR;
 
 public class EyeLogger : MonoBehaviour
 {
-    public bool logging;
+    public enum LoggerState
+    {
+        Inference,
+        Logging
+    }
+
+    private LoggerState state;
     
     // Stream Writer variables:
     private StreamWriter writer;
@@ -56,9 +62,15 @@ public class EyeLogger : MonoBehaviour
         {"Bottle", 9}
     };
 
-    public static EyeLogger Instance { get { return _instance; } }
+    public static EyeLogger Instance => _instance;
 
     private int logIndex;
+
+    public int sequenceLength;
+    public int inputLength;
+    private float[,] loggedData;
+    public bool dataIsReady;
+    private int capturedFrames;
     
     private void Awake()
     {
@@ -72,27 +84,18 @@ public class EyeLogger : MonoBehaviour
     
     void Start()
     {
+        state = LoggerState.Inference;
+        capturedFrames = 0;
+        dataIsReady = false;
+        
+        loggedData = new float[sequenceLength, inputLength]; 
         logIndex = PlayerPrefs.GetInt("Index", 0);
         logIndex++;
         PlayerPrefs.SetInt("Index", logIndex);
         currentFrame = 0;
         
         writer = new StreamWriter(GetPath());
-        
-        /*writer.WriteLine("Frame;" +
-                         "Timestamp;" +
-                         "Player Position;" +
-                         "Player Rotation;" +
-                         "Right Hand Position;" +
-                         "Right Hand Rotation;" +
-                         "Left Hand Position;" +
-                         "Left Hand Rotation;" +
-                         "Gaze Vector;" +
-                         "Gaze Position;" +
-                         "Gaze Object Tag;" + 
-                         "Gaze Position Pixel Space"
-                         );
-*/
+
         string csvHeader =
             "frame" + DELIM +
             
@@ -142,19 +145,22 @@ public class EyeLogger : MonoBehaviour
     void Update()
     {
         UpdateValues();
+        CaptureInferenceData();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            logging = !logging;
-
-            if(logging)
+            if (state == LoggerState.Inference)
+            {
+                currentFrame = 0;
+                state = LoggerState.Logging;
                 Debug.Log("Logging started!");
+            }
             else
-                Debug.Log("Logging finished!");
+            {
+                state = LoggerState.Inference;
+                Debug.Log("Logging finished! Switching to inference...");
+            }
         }
-
-        if(!logging)
-            return;
 
         currentFrame++;
     }
@@ -167,7 +173,7 @@ public class EyeLogger : MonoBehaviour
         
         //Debug.Log("Logged gaze object is: " + gazeObj);
         
-        if(!logging)
+        if(state != LoggerState.Logging)
             return;
 
         writer.WriteLine(GetLogAsString());
@@ -188,6 +194,59 @@ public class EyeLogger : MonoBehaviour
         
         leftHandPosition = leftHand.transform.position;
         leftHandRotation = leftHand.transform.rotation;
+    }
+
+    private void CaptureInferenceData()
+    {
+        var loggedDataLastFrameIdx = loggedData.GetLength(0) - 1;
+        
+        //first shift the array one to the left
+        for (int i = loggedDataLastFrameIdx; i >= 1; i--)
+        {
+            for (int j = 0; j < loggedData.GetLength(1) - 1; j++)
+            {
+                loggedData[i - 1, j] = loggedData[i, j];
+            }
+        }
+
+        Vector3 playerUp = player.transform.up;
+        Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
+        Vector3 rightHandUp = rightHand.transform.up;
+        Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
+
+        //Add last frame to the end of the array
+        //Didn't find a more performant way to do it
+        loggedData[loggedDataLastFrameIdx, 0] = playerUp.x;
+        loggedData[loggedDataLastFrameIdx, 1] = playerUp.y;
+        loggedData[loggedDataLastFrameIdx, 2] = playerUp.z;
+        loggedData[loggedDataLastFrameIdx, 3] = rightHandPos.x;
+        loggedData[loggedDataLastFrameIdx, 4] = rightHandPos.y;
+        loggedData[loggedDataLastFrameIdx, 5] = rightHandPos.z;
+        loggedData[loggedDataLastFrameIdx, 6] = rightHandUp.x;
+        loggedData[loggedDataLastFrameIdx, 7] = rightHandUp.y;
+        loggedData[loggedDataLastFrameIdx, 8] = rightHandUp.z;
+        loggedData[loggedDataLastFrameIdx, 9] = gazeVector.x;
+        loggedData[loggedDataLastFrameIdx, 10] = gazeVector.y;
+        loggedData[loggedDataLastFrameIdx, 11] = gazeVector.z;
+        loggedData[loggedDataLastFrameIdx, 12] = gazePoint.x;
+        loggedData[loggedDataLastFrameIdx, 13] = gazePoint.y;
+        loggedData[loggedDataLastFrameIdx, 14] = gazePoint.z;
+        loggedData[loggedDataLastFrameIdx, 15] = TagToInt(gazeObjectTag);
+        loggedData[loggedDataLastFrameIdx, 16] = pixelPositionObject.x;
+        loggedData[loggedDataLastFrameIdx, 17] = pixelPositionObject.y;
+        loggedData[loggedDataLastFrameIdx, 18] = pixelPositionObject.z;
+
+        // check if data is ready to be collected
+        capturedFrames++;
+        if (capturedFrames == sequenceLength)
+        {
+            dataIsReady = true;
+            capturedFrames = 0;
+        }
+        else
+        {
+            dataIsReady = false;
+        }
     }
 
     private Vector3 GetRelativePosition(Transform origin, Vector3 position)
@@ -277,5 +336,68 @@ public class EyeLogger : MonoBehaviour
     {
         Debug.Log("Setting interacted object: " + objectTag);
         objectInteractedWith = objectTag;
+    }
+
+    // this worked for one frame, not for batches
+    public float[,] GetVectorData()
+    {
+        Vector3 playerUp = player.transform.up;
+        
+        Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
+        Vector3 rightHandUp = rightHand.transform.up;
+        
+        Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
+        return new float[,]
+        {
+            {
+                playerUp.x,
+                playerUp.y,
+                playerUp.z,
+                rightHandPos.x,
+                rightHandPos.y,
+                rightHandPos.z,
+                rightHandUp.x,
+                rightHandUp.y,
+                rightHandUp.z,
+                gazeVector.x,
+                gazeVector.y,
+                gazeVector.z,
+                gazePoint.x,
+                gazePoint.y,
+                gazePoint.z,
+                TagToInt(gazeObjectTag),
+                pixelPositionObject.x,
+                pixelPositionObject.y,
+                pixelPositionObject.z,
+            }
+        }
+        ;
+        return new float[,]
+        {
+            {playerUp.x},
+            {playerUp.y},
+            {playerUp.z},
+            {rightHandPos.x},
+            {rightHandPos.y},
+            {rightHandPos.z},
+            {rightHandUp.x},
+            {rightHandUp.y},
+            {rightHandUp.z},
+            {gazeVector.x},
+            {gazeVector.y},
+            {gazeVector.z},
+            {gazePoint.x},
+            {gazePoint.y},
+            {gazePoint.z},
+            {TagToInt(gazeObjectTag)},
+            {pixelPositionObject.x},
+            {pixelPositionObject.y},
+            {pixelPositionObject.z}
+        };
+    }
+
+    public float[,] GetData()
+    {
+        return loggedData;
     }
 }

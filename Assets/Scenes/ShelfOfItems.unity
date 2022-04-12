@@ -610,6 +610,53 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &121109601
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 121109602}
+  - component: {fileID: 121109603}
+  m_Layer: 0
+  m_Name: IntentionPredictor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &121109602
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121109601}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &121109603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121109601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6980bc734a6186149bef2b7ea64ffecf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelAsset: {fileID: 5022602860645237092, guid: 95c5713e911215e40a0dc6404d11b082, type: 3}
+  prediction:
+    predictedValue: 0
+    predicted: []
 --- !u!1 &128258465
 GameObject:
   m_ObjectHideFlags: 0
@@ -1528,11 +1575,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 183620b4e2d400047a35ff0d92e29418, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logging: 0
   player: {fileID: 1718910543}
   rightHand: {fileID: 1315636270}
   leftHand: {fileID: 1778193053}
   objectInteractedWith: 
+  sequenceLength: 1
+  inputLength: 19
+  dataIsReady: 0
 --- !u!1 &652578024 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1507151385514578, guid: 4b7e2afae84d5aa4b881c4348964870b, type: 3}

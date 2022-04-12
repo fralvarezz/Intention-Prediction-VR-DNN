@@ -13,7 +13,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 2
+num_epochs = 5
 batch_size = 1
 learning_rate = 0.001
 
@@ -53,13 +53,13 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv")
 
-frames_to_backlabel = 225
+frames_to_backlabel = 500
 up.update_label_frames(frames_to_backlabel)
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
 
-n_total_steps = len(up.data)/sequence_length
+n_total_steps = len(up.data) / sequence_length
 
 for epoch in range(num_epochs):
     i = 0
@@ -73,7 +73,7 @@ for epoch in range(num_epochs):
         frames_batch = up.get_batch(i, j)
 
         frames_batch_no_labels = frames_batch[:, :-1]
-        labels = frames_batch[:, -1]
+        labels = frames_batch[-1, [-1]]
 
         frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
         labels = torch.from_numpy(labels).to(device)
@@ -86,6 +86,7 @@ for epoch in range(num_epochs):
         # Forward pass
 
         outputs = model(frames_batch_no_labels)
+        _, predicted = torch.max(outputs.data, 1)
         loss = criterion(outputs, labels)
 
         # Backward and optimize
@@ -97,7 +98,12 @@ for epoch in range(num_epochs):
         j += sequence_length
 
         if (j + 1) % 100 == 0:
-            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j + 1}/{n_total_steps}], Loss: {loss.item():.4f}')
+            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j}/{n_total_steps}], Loss: {loss.item():.4f}')
+            print(predicted)
+
+dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
+torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
+                  opset_version=9, verbose=True)  # Unity says opset_version=9 has the most support
 
 '''
 # Test the model
