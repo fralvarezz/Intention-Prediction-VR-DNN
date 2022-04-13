@@ -33,7 +33,7 @@ public class IntentionPredictor : MonoBehaviour
             predicted = t.AsFloats();
             // The most likely one is the predicted value.
             predictedValue = Array.IndexOf(predicted, predicted.Max());
-            Debug.Log($"Predicted {predictedValue}");
+            //Debug.Log($"Predicted {predictedValue}");
         }
     }
 
@@ -68,6 +68,7 @@ public class IntentionPredictor : MonoBehaviour
         
         prediction.SetPrediction(outputTensor);
         HighlightPredictedObject();
+        Debug.Log($"Predicted {GetPredictedObject()}");
         
         inputTensor.Dispose();
     }
