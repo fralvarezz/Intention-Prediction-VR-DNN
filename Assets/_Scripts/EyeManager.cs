@@ -77,6 +77,11 @@ public class EyeManager : MonoBehaviour
                 _gazeObjectName = FocusInfo.transform.name;
             }
         }
+        else
+        {
+            _gazePoint = gazeRay.GetPoint(MaxDistance);
+            _gazeObjectName = "";
+        }
         
         eyeLogger.Log(_gazeVector, _gazePoint, _gazeObjectName);
         

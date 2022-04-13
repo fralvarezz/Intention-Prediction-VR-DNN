@@ -13,6 +13,9 @@ public class IntentionPredictor : MonoBehaviour
 
     private IWorker worker;
     
+    public List<GameObject> objects;
+    private PredictedHighlighter highlighter;
+
     /// <summary>
     /// A struct used for holding the results of our prediction in a way that's easy to view from the inspector.
     /// </summary>
@@ -38,6 +41,8 @@ public class IntentionPredictor : MonoBehaviour
     
     void Start()
     {
+        highlighter = GetComponent<PredictedHighlighter>();
+        
         // Load the model and make a worker
         runtimeModel = ModelLoader.Load(modelAsset);
         worker = WorkerFactory.CreateWorker(runtimeModel, WorkerFactory.Device.GPU);
@@ -62,6 +67,7 @@ public class IntentionPredictor : MonoBehaviour
         Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
         
         prediction.SetPrediction(outputTensor);
+        HighlightPredictedObject();
         
         inputTensor.Dispose();
     }
@@ -71,4 +77,17 @@ public class IntentionPredictor : MonoBehaviour
         // Dispose of the engine manually (not garbage-collected).
         worker?.Dispose();
     }
+    
+    //Returns the predicted GameObject
+    public GameObject GetPredictedObject()
+    {
+        return objects[prediction.predictedValue];
+    }
+    
+    //Highlights the predicted GameObject
+    public void HighlightPredictedObject()
+    {
+        highlighter.Highlight(GetPredictedObject());
+    }
+    
 }
