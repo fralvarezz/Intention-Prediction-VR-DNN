@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 
 # Device configuration
 import torchvision
@@ -8,19 +9,21 @@ import torchvision.transforms as transforms
 
 import UNITY_CSV_PARSER
 
+writer = SummaryWriter("runs")
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 5
+num_epochs = 2
 batch_size = 1
-learning_rate = 0.001
+learning_rate = 0.01
 
 input_size = 19  # num of inputs per frame
 sequence_length = 1  # num of frames at a time, I believe
 hidden_size = 128
-num_layers = 1
+num_layers = 4
 
 
 class RNN_LSTM(nn.Module):
@@ -53,7 +56,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv")
 
-frames_to_backlabel = 500
+frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
@@ -61,6 +64,8 @@ up.update_label_frames(frames_to_backlabel)
 
 n_total_steps = len(up.data) / sequence_length
 
+running_loss = 0.0
+running_correct = 0
 for epoch in range(num_epochs):
     i = 0
     j = i + sequence_length
@@ -97,9 +102,18 @@ for epoch in range(num_epochs):
         i += sequence_length
         j += sequence_length
 
+        running_loss += loss.item()
+
+        _, predicted = torch.max(outputs.data, 1)
+        running_correct += (predicted == labels).sum().item()
         if (j + 1) % 100 == 0:
             print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j}/{n_total_steps}], Loss: {loss.item():.4f}')
-            print(predicted)
+            writer.add_scalar('training loss', running_loss/ 100, epoch * n_total_steps + i)
+            writer.add_scalar('accuracy', running_correct/ 100, epoch * n_total_steps + i)
+            running_loss = 0.0
+            running_correct = 0
+
+writer.close()
 
 dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
 torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
