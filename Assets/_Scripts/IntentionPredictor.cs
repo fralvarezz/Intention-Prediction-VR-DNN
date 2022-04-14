@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Barracuda;
 using UnityEngine;
 
@@ -15,6 +16,8 @@ public class IntentionPredictor : MonoBehaviour
     
     public List<GameObject> objects;
     private PredictedHighlighter highlighter;
+
+    public TextMeshProUGUI textMeshProUGUI;
 
     /// <summary>
     /// A struct used for holding the results of our prediction in a way that's easy to view from the inspector.
@@ -82,6 +85,7 @@ public class IntentionPredictor : MonoBehaviour
     //Returns the predicted GameObject
     public GameObject GetPredictedObject()
     {
+        //Debug.Log($"Predicted item with id {prediction.predictedValue}");
         return objects[prediction.predictedValue];
     }
     
@@ -89,6 +93,7 @@ public class IntentionPredictor : MonoBehaviour
     public void HighlightPredictedObject()
     {
         highlighter.Highlight(GetPredictedObject());
+        textMeshProUGUI.text = "Predicted:" + prediction.predictedValue.ToString();
     }
     
 }

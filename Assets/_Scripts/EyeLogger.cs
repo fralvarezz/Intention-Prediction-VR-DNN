@@ -326,7 +326,7 @@ public class EyeLogger : MonoBehaviour
 
     private int TagToInt(string objectTag)
     {
-        if (!nameToIntDict.ContainsKey(objectTag))
+        if (objectTag == null || !nameToIntDict.ContainsKey(objectTag))
             throw new Exception($"{objectTag} not available in tags dictionary");
 
         return nameToIntDict[objectTag];
