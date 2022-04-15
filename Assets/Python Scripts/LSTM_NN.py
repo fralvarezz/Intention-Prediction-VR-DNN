@@ -8,8 +8,12 @@ import torchvision
 import torchvision.transforms as transforms
 
 import UNITY_CSV_PARSER
+import time
 
-writer = SummaryWriter("runs")
+now = time.strftime("%c")
+log_dir = ("./runs/" + now).replace(":", ",")
+
+writer = SummaryWriter(log_dir)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

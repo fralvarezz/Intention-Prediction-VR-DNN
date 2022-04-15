@@ -65,15 +65,15 @@ class UnityParser:
         return len(self.data)
 
 
-up = UnityParser("merge_1.csv", "merge_2.csv")
+#up = UnityParser("../CSVs/experiment10.csv", "../CSVs/experiment10.csv")
 
-up.update_label_frames(225)
+#up.update_label_frames(225)
 #up.update_label_frames(225)
 
 #for f in up:
     #print(f)
 
-up.save_to_disc("formatted_merge.csv")
+# up.save_to_disc("formatted_merge.csv")
 
 #data = np.genfromtxt("formatted_success.csv", delimiter=";")
 #print(data)
