@@ -20,12 +20,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 2
+num_epochs = 500
 batch_size = 1
 learning_rate = 0.0001
 
 input_size = 19  # num of inputs per frame
-sequence_length = 1  # num of frames at a time, I believe
+sequence_length = 45  # num of frames at a time, I believe
 hidden_size = 128
 num_layers = 2
 
@@ -58,7 +58,10 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv", "../CSVs/experiment10.csv")
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
+                                  "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
+                                  "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
+                                  "../CSVs/experiment12.csv",)
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
