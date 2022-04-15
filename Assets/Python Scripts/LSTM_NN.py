@@ -72,12 +72,12 @@ running_loss = 0.0
 running_correct = 0
 
 frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
-
+global_step_count = 0
 for epoch in range(num_epochs):
-    starting_frame = 0
-    ending_frame = starting_frame + sequence_length
     data_size = len(up)
     for k in range(data_size):
+        starting_frame = 0
+        ending_frame = starting_frame + sequence_length
         frame_amount = len(up[k])
         if ending_frame > frame_amount:
             ending_frame = frame_amount - 1
@@ -107,19 +107,21 @@ for epoch in range(num_epochs):
             optimizer.step()
 
             starting_frame += frame_timeseries_jump
-            ending_frame += sequence_length
+            ending_frame = starting_frame + sequence_length
 
             running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             running_correct += (predicted == labels).sum().item()
 
             if (starting_frame + 1) % 100 == 0:
-                print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {loss.item():.4f}')
+                print(f'Epoch [{epoch + 1}/{num_epochs}], File [{k+1}/{data_size}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {loss.item():.4f}')
                 print((epoch + 1) * starting_frame)
-                writer.add_scalar('training loss', running_loss / 100, epoch * (frame_amount - sequence_length) + starting_frame)
-                writer.add_scalar('accuracy', running_correct / 100, epoch * (frame_amount - sequence_length) + starting_frame)
+                global_step_count += 100
+                writer.add_scalar('training loss', running_loss / 100, global_step_count)
+                writer.add_scalar('accuracy', running_correct / 100, global_step_count)
                 running_loss = 0.0
                 running_correct = 0
+    up.shuffle_data()
 
 writer.close()
 

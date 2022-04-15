@@ -1,6 +1,6 @@
 import numpy as np
 from os.path import exists
-
+import random
 def conv(x):
     return x.replace('.', '').replace(',', '.').encode()
 
@@ -23,6 +23,15 @@ class UnityParser:
 
     def __getitem__(self, item):
         return self.data[item]
+
+    def shuffle_data(self):
+        random.shuffle(self.data)
+
+    def get_total_it_count(self):
+        n = 0
+        for d in self.data:
+            n += len(d)
+        return n
 
     def update_label_frames(self, backtrack_frame_count):
         cur_data_slice = 0
