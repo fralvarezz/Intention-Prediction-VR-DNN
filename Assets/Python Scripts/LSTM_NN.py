@@ -91,7 +91,6 @@ for epoch in range(num_epochs):
         # Forward pass
 
         outputs = model(frames_batch_no_labels)
-        _, predicted = torch.max(outputs.data, 1)
         loss = criterion(outputs, labels)
 
         # Backward and optimize
@@ -108,8 +107,8 @@ for epoch in range(num_epochs):
         running_correct += (predicted == labels).sum().item()
         if (j + 1) % 100 == 0:
             print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j}/{n_total_steps}], Loss: {loss.item():.4f}')
-            writer.add_scalar('training loss', running_loss/ 100, epoch * n_total_steps + i)
-            writer.add_scalar('accuracy', running_correct/ 100, epoch * n_total_steps + i)
+            writer.add_scalar('training loss', running_loss / 100, int(epoch * n_total_steps + i))
+            writer.add_scalar('accuracy', running_correct / 100, int(epoch * n_total_steps + i))
             running_loss = 0.0
             running_correct = 0
 
