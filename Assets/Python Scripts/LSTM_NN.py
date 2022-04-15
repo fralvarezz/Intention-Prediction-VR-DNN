@@ -66,7 +66,7 @@ up.update_label_frames(frames_to_backlabel)
 
 # TODO: Finish below
 
-n_total_steps = len(up.data) / sequence_length
+n_total_steps = int(len(up.data) / sequence_length)
 
 running_loss = 0.0
 running_correct = 0
@@ -115,8 +115,9 @@ for epoch in range(num_epochs):
 
             if (starting_frame + 1) % 100 == 0:
                 print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {loss.item():.4f}')
-                writer.add_scalar('training loss', running_loss / 100, int(epoch * n_total_steps + starting_frame))
-                writer.add_scalar('accuracy', running_correct / 100, int(epoch * n_total_steps + starting_frame))
+                print((epoch + 1) * starting_frame)
+                writer.add_scalar('training loss', running_loss / 100, epoch * (frame_amount - sequence_length) + starting_frame)
+                writer.add_scalar('accuracy', running_correct / 100, epoch * (frame_amount - sequence_length) + starting_frame)
                 running_loss = 0.0
                 running_correct = 0
 
