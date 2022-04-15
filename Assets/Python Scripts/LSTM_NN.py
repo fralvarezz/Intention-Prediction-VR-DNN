@@ -25,7 +25,7 @@ batch_size = 1
 learning_rate = 0.0001
 
 input_size = 19  # num of inputs per frame
-sequence_length = 45  # num of frames at a time, I believe
+sequence_length = 225  # num of frames at a time, I believe
 hidden_size = 128
 num_layers = 2
 
@@ -61,7 +61,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
                                   "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
-                                  "../CSVs/experiment12.csv",)
+                                  "../CSVs/experiment12.csv")
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
@@ -79,6 +79,9 @@ global_step_count = 0
 for epoch in range(num_epochs):
     data_size = len(up)
     for k in range(data_size):
+        running_loss = 0.0
+        running_correct = 0
+
         starting_frame = 0
         ending_frame = starting_frame + sequence_length
         frame_amount = len(up[k])
@@ -115,15 +118,15 @@ for epoch in range(num_epochs):
             running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             running_correct += (predicted == labels).sum().item()
-
             if (starting_frame + 1) % 100 == 0:
-                print(f'Epoch [{epoch + 1}/{num_epochs}], File [{k+1}/{data_size}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {loss.item():.4f}')
+                print(f'Epoch [{epoch + 1}/{num_epochs}], File [{k+1}/{data_size}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {running_loss:.4f}')
                 print((epoch + 1) * starting_frame)
                 global_step_count += 100
                 writer.add_scalar('training loss', running_loss / 100, global_step_count)
                 writer.add_scalar('accuracy', running_correct / 100, global_step_count)
                 running_loss = 0.0
                 running_correct = 0
+
     up.shuffle_data()
 
 writer.close()
