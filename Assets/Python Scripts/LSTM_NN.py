@@ -20,7 +20,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 500
+num_epochs = 50
 batch_size = 1
 learning_rate = 0.0001
 
@@ -128,6 +128,9 @@ for epoch in range(num_epochs):
                 running_correct = 0
 
     up.shuffle_data()
+    path = './models/training_model_' + global_step_count
+    torch.save(model.cpu().state_dict(), path)
+    model.cuda(device)
 
 writer.close()
 
