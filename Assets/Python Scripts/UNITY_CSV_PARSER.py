@@ -14,11 +14,15 @@ class UnityParser:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
                     5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
                     delimiter=";", skip_header=1, dtype=np.float32)
+                data = np.nan_to_num(data)
                 self.data.append(data)
 
     def __iter__(self):
         for frame in self.data:
             yield frame
+
+    def __getitem__(self, item):
+        return self.data[item]
 
     def update_label_frames(self, backtrack_frame_count):
         cur_data_slice = 0
@@ -61,15 +65,15 @@ class UnityParser:
         return len(self.data)
 
 
-#up = UnityParser("merge_1.csv", "merge_2.csv")
+up = UnityParser("merge_1.csv", "merge_2.csv")
 
-#up.update_label_frames(225)
+up.update_label_frames(225)
 #up.update_label_frames(225)
 
 #for f in up:
     #print(f)
 
-#up.save_to_disc("formatted_success.csv")
+up.save_to_disc("formatted_merge.csv")
 
 #data = np.genfromtxt("formatted_success.csv", delimiter=";")
 #print(data)

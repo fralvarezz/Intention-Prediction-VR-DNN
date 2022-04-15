@@ -54,7 +54,7 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv")
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment10.csv", "../CSVs/experiment10.csv")
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
@@ -69,48 +69,49 @@ running_correct = 0
 for epoch in range(num_epochs):
     i = 0
     j = i + sequence_length
-    n = len(up)
+    data_size = len(up)
+    for k in range(0, data_size):
+        n = len(up[k])
+        if j > n:
+            j = n - 1
 
-    if j > n:
-        j = n - 1
+        while j < n:
+            frames_batch = up.get_batch(k, i, j)
 
-    while j < n:
-        frames_batch = up.get_batch(i, j)
+            frames_batch_no_labels = frames_batch[:, :-1]
+            labels = frames_batch[-1, [-1]]
 
-        frames_batch_no_labels = frames_batch[:, :-1]
-        labels = frames_batch[-1, [-1]]
+            frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
+            labels = torch.from_numpy(labels).to(device)
+            labels = labels.type(torch.LongTensor).to(device)
 
-        frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
-        labels = torch.from_numpy(labels).to(device)
-        labels = labels.type(torch.LongTensor).to(device)
+            frames_batch_no_labels = frames_batch_no_labels.reshape(batch_size, sequence_length, input_size)
 
-        frames_batch_no_labels = frames_batch_no_labels.reshape(batch_size, sequence_length, input_size)
+            # frames_batch shape is [batch_size, sequence_length, input_size]
 
-        # frames_batch shape is [batch_size, sequence_length, input_size]
+            # Forward pass
 
-        # Forward pass
+            outputs = model(frames_batch_no_labels)
+            loss = criterion(outputs, labels)
 
-        outputs = model(frames_batch_no_labels)
-        loss = criterion(outputs, labels)
+            # Backward and optimize
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            i += sequence_length
+            j += sequence_length
 
-        i += sequence_length
-        j += sequence_length
+            running_loss += loss.item()
 
-        running_loss += loss.item()
-
-        _, predicted = torch.max(outputs.data, 1)
-        running_correct += (predicted == labels).sum().item()
-        if (j + 1) % 100 == 0:
-            print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j}/{n_total_steps}], Loss: {loss.item():.4f}')
-            writer.add_scalar('training loss', running_loss / 100, int(epoch * n_total_steps + i))
-            writer.add_scalar('accuracy', running_correct / 100, int(epoch * n_total_steps + i))
-            running_loss = 0.0
-            running_correct = 0
+            _, predicted = torch.max(outputs.data, 1)
+            running_correct += (predicted == labels).sum().item()
+            if (j + 1) % 100 == 0:
+                print(f'Epoch [{epoch + 1}/{num_epochs}], Step [{j}/{n_total_steps}], Loss: {loss.item():.4f}')
+                writer.add_scalar('training loss', running_loss / 100, int(epoch * n_total_steps + i))
+                writer.add_scalar('accuracy', running_correct / 100, int(epoch * n_total_steps + i))
+                running_loss = 0.0
+                running_correct = 0
 
 writer.close()
 
