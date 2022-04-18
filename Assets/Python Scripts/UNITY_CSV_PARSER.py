@@ -58,6 +58,19 @@ class UnityParser:
                 n -= 1
             cur_data_slice += 1
 
+    def full_update_label_frames(self):
+        cur_data_slice = 0
+        for data in self.data:
+            used_tag = 0
+            n = len(data) - 1
+            for frame in reversed(data):
+                if self.data[cur_data_slice][n][-1] == 0:
+                    self.data[cur_data_slice][n][-1] = used_tag
+                else:
+                    used_tag = self.data[cur_data_slice][n][-1]
+                n -= 1
+            cur_data_slice += 1
+
     def save_to_disc(self, path):
         #  Saves ALL csv files to disk
         if exists(path):
