@@ -1,6 +1,10 @@
 import numpy as np
 from os.path import exists
 import random
+
+from sklearn.preprocessing import MinMaxScaler
+
+
 def conv(x):
     return x.replace('.', '').replace(',', '.').encode()
 
@@ -14,7 +18,14 @@ class UnityParser:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
                     5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
                     delimiter=";", skip_header=1, dtype=np.float32)
-                data = np.nan_to_num(data)
+                data = data[~np.isnan(data).any(axis=1), :]
+                data = data[~np.isinf(data).any(axis=1), :]
+                #data = np.nan_to_num(data, posinf=1337)
+
+                norm_data = data[:, :-1]
+                scaler = MinMaxScaler((-1, 1))
+                norm_data = scaler.fit_transform(norm_data)
+                data[:, :-1] = norm_data
                 self.data.append(data)
 
     def __iter__(self):
@@ -87,9 +98,8 @@ class UnityParser:
         return len(self.data)
 
 
-#up = UnityParser("../CSVs/experiment10.csv", "../CSVs/experiment10.csv")
+#up = UnityParser("../CSVs/experiment12.csv")
 
-#up.update_label_frames(225)
 #up.update_label_frames(225)
 
 #for f in up:

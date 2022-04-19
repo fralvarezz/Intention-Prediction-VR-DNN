@@ -1,11 +1,15 @@
+import sklearn.metrics
 import torch
 import torch.nn as nn
+import torch.nn.functional as fn
 import numpy as np
+from sklearn.metrics import classification_report
 from torch.utils.tensorboard import SummaryWriter
 
 # Device configuration
 import torchvision
 import torchvision.transforms as transforms
+from sklearn.preprocessing import MinMaxScaler
 
 import UNITY_CSV_PARSER
 import time
@@ -56,7 +60,7 @@ class RNN_LSTM(nn.Module):
 
 model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
 
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
@@ -76,8 +80,11 @@ running_correct = 0
 
 frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
 global_step_count = 0
+
 for epoch in range(num_epochs):
     data_size = len(up)
+    y_true = []
+    y_pred = []
     for k in range(data_size):
         running_loss = 0.0
         running_correct = 0
@@ -92,6 +99,10 @@ for epoch in range(num_epochs):
             frames_batch = up.get_batch(k, starting_frame, ending_frame)
 
             frames_batch_no_labels = frames_batch[:, :-1]
+
+            #scaler = MinMaxScaler((-1, 1))
+            #frames_batch_no_labels = scaler.fit_transform(frames_batch_no_labels)
+
             labels = frames_batch[-1, [-1]]
 
             frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
@@ -105,7 +116,10 @@ for epoch in range(num_epochs):
             # Forward pass
 
             outputs = model(frames_batch_no_labels)
-            loss = criterion(outputs, labels)
+
+            one_not_lables = fn.one_hot(labels, num_classes).float()
+
+            loss = criterion(outputs, one_not_lables)
 
             # Backward and optimize
             optimizer.zero_grad()
@@ -122,6 +136,8 @@ for epoch in range(num_epochs):
             running_loss += loss.item()
             _, predicted = torch.max(outputs.data, 1)
             running_correct += (predicted == labels).sum().item()
+            y_true.append(labels.item())
+            y_pred.append(predicted.item())
             if (starting_frame + 1) % 100 == 0:
                 print(f'Epoch [{epoch + 1}/{num_epochs}], File [{k+1}/{data_size}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {running_loss:.4f}')
                 print((epoch + 1) * starting_frame)
@@ -130,7 +146,7 @@ for epoch in range(num_epochs):
                 writer.add_scalar('accuracy', running_correct / 100, global_step_count)
                 running_loss = 0.0
                 running_correct = 0
-
+    print(classification_report(y_true, y_pred))
     up.shuffle_data()
     path = './models/training_model_' + str(global_step_count)
     torch.save(model.cpu().state_dict(), path)
