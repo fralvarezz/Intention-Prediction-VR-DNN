@@ -56,7 +56,7 @@ class RNN_LSTM(nn.Module):
 
 model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
 
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
@@ -110,6 +110,10 @@ for epoch in range(num_epochs):
             # Backward and optimize
             optimizer.zero_grad()
             loss.backward()
+
+            threshold = 10
+            torch.nn.utils.clip_grad_norm_(model.parameters(), threshold)
+
             optimizer.step()
 
             starting_frame += frame_timeseries_jump
@@ -128,7 +132,7 @@ for epoch in range(num_epochs):
                 running_correct = 0
 
     up.shuffle_data()
-    path = './models/training_model_' + global_step_count
+    path = './models/training_model_' + str(global_step_count)
     torch.save(model.cpu().state_dict(), path)
     model.cuda(device)
 
