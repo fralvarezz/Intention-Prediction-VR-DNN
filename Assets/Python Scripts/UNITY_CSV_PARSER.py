@@ -17,8 +17,7 @@ class UnityParser:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
                     5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
-                    delimiter=";", skip_header=1, dtype=np.float32)
-
+                                     delimiter=";", skip_header=1, dtype=np.float32)
 
                 data = data[~np.isnan(data).any(axis=1), :]
                 data = data[~np.isinf(data).any(axis=1), :]
@@ -38,6 +37,12 @@ class UnityParser:
 
     def __getitem__(self, item):
         return self.data[item]
+
+    def get_random_interval(self, interval_size):
+        random_file_id = random.randint(0, len(self.data) - 1)
+        random_file_len = len(self.data[random_file_id])
+        random_start = random.randint(0, random_file_len - interval_size - 1)
+        return self.data[random_file_id][random_start: random_start + interval_size, :]
 
     def shuffle_data(self):
         random.shuffle(self.data)
@@ -102,15 +107,14 @@ class UnityParser:
         return len(self.data)
 
 
-#up = UnityParser("../CSVs/experiment12.csv")
+# up = UnityParser("../CSVs/experiment12.csv")
+# print(up.get_random_interval(45))
+# up.update_label_frames(225)
 
-#up.update_label_frames(225)
-
-#for f in up:
-    #print(f)
+# for f in up:
+# print(f)
 
 # up.save_to_disc("formatted_merge.csv")
 
-#data = np.genfromtxt("formatted_success.csv", delimiter=";")
-#print(data)
-
+# data = np.genfromtxt("formatted_success.csv", delimiter=";")
+# print(data)
