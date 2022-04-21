@@ -65,7 +65,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
                                   "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
-                                  "../CSVs/experiment12.csv")
+                                  "../CSVs/experiment12.csv", keep_every=3)
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)

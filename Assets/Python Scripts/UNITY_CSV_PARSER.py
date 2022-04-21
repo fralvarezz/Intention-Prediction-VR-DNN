@@ -10,7 +10,7 @@ def conv(x):
 
 
 class UnityParser:
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.i = len(args)
         self.data = []
         for fname in args:
@@ -18,9 +18,13 @@ class UnityParser:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
                     5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24),
                     delimiter=";", skip_header=1, dtype=np.float32)
+
+
                 data = data[~np.isnan(data).any(axis=1), :]
                 data = data[~np.isinf(data).any(axis=1), :]
-                #data = np.nan_to_num(data, posinf=1337)
+                if "keep_every" in kwargs:
+                    keep_every = kwargs["keep_every"]
+                    data = data[::keep_every, :]
 
                 norm_data = data[:, :-1]
                 scaler = MinMaxScaler((-1, 1))
