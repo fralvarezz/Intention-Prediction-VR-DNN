@@ -13,6 +13,9 @@ class UnityParser:
     def __init__(self, *args, **kwargs):
         self.i = len(args)
         self.data = []
+        self.non_normalized_data = []
+        self.training_data = []
+        self.testing_data = []
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -25,6 +28,7 @@ class UnityParser:
                     keep_every = kwargs["keep_every"]
                     data = data[::keep_every, :]
 
+                self.non_normalized_data.append(data)
                 norm_data = data[:, :-1]
                 scaler = MinMaxScaler((-1, 1))
                 norm_data = scaler.fit_transform(norm_data)
@@ -103,11 +107,28 @@ class UnityParser:
     def get_batch(self, i, j, k):
         return self.data[i][j:k]
 
+    def get_training_batch(self, i, j, k):
+        return self.training_data[i][j:k]
+
     def __len__(self):
         return len(self.data)
 
+    def split_data(self):
+        for i in range(len(self.data)):
+            percentage_training = 80
+            training_frames = int(len(self.data[i]) * (percentage_training / 100))
+            training_data = self.data[i][:training_frames, :]
+            testing_data = self.non_normalized_data[i][training_frames:, :]
+            self.training_data.append(training_data)
+            self.testing_data.append(testing_data)
 
-# up = UnityParser("../CSVs/experiment12.csv")
+
+# up = UnityParser("../CSVs/experiment12.csv", "../CSVs/experiment1.csv")
+# up.split_data()
+
+# print(len(up.data[0]))
+# print(len(up.training_data[0]))
+# print(len(up.testing_data[0]))
 # print(up.get_random_interval(45))
 # up.update_label_frames(225)
 

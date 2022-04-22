@@ -24,7 +24,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 50
+num_epochs = 1
 batch_size = 1
 learning_rate = 0.0001
 
@@ -69,6 +69,7 @@ up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
+up.split_data()
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
@@ -81,6 +82,7 @@ running_correct = 0
 frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
 global_step_count = 0
 
+# TRAINING LOOP
 for epoch in range(num_epochs):
     data_size = len(up)
     y_true = []
@@ -91,20 +93,18 @@ for epoch in range(num_epochs):
 
         starting_frame = 0
         ending_frame = starting_frame + sequence_length
-        frame_amount = len(up[k])
+        frame_amount = len(up.training_data[k])
         if ending_frame > frame_amount:
             ending_frame = frame_amount - 1
 
         while ending_frame < frame_amount:
-            frames_batch = up.get_batch(k, starting_frame, ending_frame)
-
+            frames_batch = up.get_training_batch(k, starting_frame, ending_frame)
             frames_batch_no_labels = frames_batch[:, :-1]
 
             #scaler = MinMaxScaler((-1, 1))
             #frames_batch_no_labels = scaler.fit_transform(frames_batch_no_labels)
 
             labels = frames_batch[-1, [-1]]
-
             frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
             labels = torch.from_numpy(labels).to(device)
             labels = labels.type(torch.LongTensor).to(device)
@@ -148,40 +148,58 @@ for epoch in range(num_epochs):
                 running_correct = 0
     print(classification_report(y_true, y_pred))
     up.shuffle_data()
-    path = './models/training_model_' + str(global_step_count)
-    torch.save(model.cpu().state_dict(), path)
-    model.cuda(device)
+    #path = './models/training_model_' + str(global_step_count)
+    #torch.save(model.cpu().state_dict(), path)
+    #model.cuda(device)
 
 writer.close()
 
-dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
-torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
-                  opset_version=9, verbose=True)  # Unity says opset_version=9 has the most support
-
-'''
 # Test the model
 # In test phase, we don't need to compute gradients (for memory efficiency)
+
 with torch.no_grad():
+    testing_frame_timeseries_jump = sequence_length
+
     n_correct = 0
     n_samples = 0
-    for images, labels in test_loader:
-        images = images.reshape(-1, sequence_length, input_size).to(device)
-        labels = labels.to(device)
-        outputs = model(images)
-        # max returns (value ,index)
-        _, predicted = torch.max(outputs.data, 1)
-        n_samples += labels.size(0)
-        n_correct += (predicted == labels).sum().item()
+    for file in up.testing_data:
+
+        starting_frame = 0
+        ending_frame = starting_frame + sequence_length
+
+        frame_amount = len(file)
+        if ending_frame > frame_amount:
+            ending_frame = frame_amount - 1
+
+        while ending_frame < frame_amount:
+            training_data = file[starting_frame:ending_frame, :]
+            training_data_no_labels = training_data[:, :-1]
+            training_data_labels = training_data[:, [-1]]
+            training_data_labels = torch.from_numpy(training_data_labels).to(device)
+            training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
+            training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
+            #training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
+
+
+            print(training_data_labels.size())
+            print(training_data_no_labels.size())
+
+            outputs = model(training_data_no_labels)
+            _, predicted = torch.max(outputs.data, 1)
+
+            n_samples += training_data_labels.size(0)
+            n_correct += (predicted == training_data_labels).sum().item()
+
+            starting_frame += testing_frame_timeseries_jump
+            ending_frame = starting_frame + sequence_length
+
 
     acc = 100.0 * n_correct / n_samples
-    print(f'Accuracy of the network on the 10000 test images: {acc} %')
+    print(f'Accuracy of the network: {acc} %')
 
-x = torch.randn(100, 28, 28).to(device)
-torch.onnx.export(model, x, "../NN_Models/model.onnx",
-            opset_version=9, verbose=True)  # Unity says opset_version=9 has the most support
-
-
-#if __name__ == '__main__':
+dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
+torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
+                  opset_version=9, verbose=True)  
 
 
-'''
+                  # Unity says opset_version=9 has the most support
