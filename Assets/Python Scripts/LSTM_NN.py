@@ -65,8 +65,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
                                   "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
-                                  "../CSVs/experiment12.csv", keep_every=3)
-
+                                  "../CSVs/experiment12.csv")
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
 up.split_data()
@@ -110,6 +109,7 @@ for epoch in range(num_epochs):
             labels = labels.type(torch.LongTensor).to(device)
 
             frames_batch_no_labels = frames_batch_no_labels.reshape(batch_size, sequence_length, input_size)
+
 
             # frames_batch shape is [batch_size, sequence_length, input_size]
 
@@ -171,18 +171,14 @@ with torch.no_grad():
         if ending_frame > frame_amount:
             ending_frame = frame_amount - 1
 
-        while ending_frame < frame_amount:
+        while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
             training_data = file[starting_frame:ending_frame, :]
             training_data_no_labels = training_data[:, :-1]
             training_data_labels = training_data[:, [-1]]
             training_data_labels = torch.from_numpy(training_data_labels).to(device)
             training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
             training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
-            #training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
-
-
-            print(training_data_labels.size())
-            print(training_data_no_labels.size())
+            training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
 
             outputs = model(training_data_no_labels)
             _, predicted = torch.max(outputs.data, 1)
@@ -193,13 +189,10 @@ with torch.no_grad():
             starting_frame += testing_frame_timeseries_jump
             ending_frame = starting_frame + sequence_length
 
-
     acc = 100.0 * n_correct / n_samples
     print(f'Accuracy of the network: {acc} %')
 
 dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
 torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
-                  opset_version=9, verbose=True)  
-
-
+                  opset_version=9, verbose=True)
                   # Unity says opset_version=9 has the most support
