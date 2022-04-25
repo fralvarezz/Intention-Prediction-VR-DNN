@@ -66,8 +66,8 @@ up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment
                                   "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
                                   "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
                                   "../CSVs/experiment12.csv")
-frames_to_backlabel = 225
-up.update_label_frames(frames_to_backlabel)
+# frames_to_backlabel = 10
+up.full_update_label_frames()
 up.split_data()
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
@@ -117,9 +117,9 @@ for epoch in range(num_epochs):
 
             outputs = model(frames_batch_no_labels)
 
-            one_not_lables = fn.one_hot(labels, num_classes).float()
+            one_hot_lables = fn.one_hot(labels, num_classes).float()
 
-            loss = criterion(outputs, one_not_lables)
+            loss = criterion(outputs, one_hot_lables)
 
             # Backward and optimize
             optimizer.zero_grad()
@@ -158,10 +158,13 @@ writer.close()
 # In test phase, we don't need to compute gradients (for memory efficiency)
 
 with torch.no_grad():
-    testing_frame_timeseries_jump = sequence_length
+    testing_frame_timeseries_jump = 1
 
     n_correct = 0
     n_samples = 0
+
+    training_y_true = []
+    training_y_pred = []
     for file in up.testing_data:
 
         starting_frame = 0
@@ -174,7 +177,7 @@ with torch.no_grad():
         while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
             training_data = file[starting_frame:ending_frame, :]
             training_data_no_labels = training_data[:, :-1]
-            training_data_labels = training_data[:, [-1]]
+            training_data_labels = training_data[-1, [-1]]
             training_data_labels = torch.from_numpy(training_data_labels).to(device)
             training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
             training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
@@ -186,11 +189,15 @@ with torch.no_grad():
             n_samples += training_data_labels.size(0)
             n_correct += (predicted == training_data_labels).sum().item()
 
+            training_y_true.append(training_data_labels.item())
+            training_y_pred.append(predicted.item())
+
             starting_frame += testing_frame_timeseries_jump
             ending_frame = starting_frame + sequence_length
 
     acc = 100.0 * n_correct / n_samples
     print(f'Accuracy of the network: {acc} %')
+    print(classification_report(training_y_true, training_y_pred))
 
 dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
 torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
