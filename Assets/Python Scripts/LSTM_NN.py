@@ -69,6 +69,7 @@ up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment
 
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
+up.generate_rand()
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below

@@ -2,6 +2,8 @@ import numpy as np
 from os.path import exists
 import random
 
+import torch.nn
+import torch.nn.functional
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -13,6 +15,8 @@ class UnityParser:
     def __init__(self, *args, **kwargs):
         self.i = len(args)
         self.data = []
+        self.max_vals = []
+        self.min_vals = []
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -28,8 +32,27 @@ class UnityParser:
                 norm_data = data[:, :-1]
                 scaler = MinMaxScaler((-1, 1))
                 norm_data = scaler.fit_transform(norm_data)
-                data[:, :-1] = norm_data
+
+                if len(self.min_vals) == 0:
+                    self.min_vals = data.min(axis=0)
+                else:
+                    self.min_vals = min(list(self.min_vals), list(data.min(axis=0)))
+
+                if len(self.max_vals) == 0:
+                    self.max_vals = data.max(axis=0)
+                else:
+                    self.max_vals = max(list(self.max_vals), list(data.max(axis=0)))
+                # normalized_col = scaler.fit_transform(norm_data[:, 17])
+
+                # max_vals = data.max(axis=0)
+                # data[:, :-1] = norm_data
                 self.data.append(data)
+        for i in range(0, len(self.data)):
+            for j in range(0, len(self.data[i])):
+                for k in range(0, len(self.data[i][j])):
+                    # Normalizing data on a column by column basis
+                    self.data[i][j][k] = (self.data[i][j][k] - self.min_vals[k]) / (self.max_vals[k] - self.min_vals[k])
+
 
     def __iter__(self):
         for frame in self.data:
@@ -106,11 +129,77 @@ class UnityParser:
     def __len__(self):
         return len(self.data)
 
+    def generate_rand(self, epsilon=None):
+        if not epsilon:
+            epsilon = random.uniform(-1, 1)
+        generated_data = []
+        d, nonzero_list = self.split_data_into_class_dict()
+        order = list(range(1, 10))
+        random.shuffle(order)
 
-# up = UnityParser("../CSVs/experiment12.csv")
+        random.shuffle(nonzero_list)
+        for segment in nonzero_list:
+            entry = []
+            if len(segment) > 5:
+                for r in segment:
+                    entry.append(self.add_epsilon(r, epsilon))
+            self.data.append(np.array(entry))
+
+
+            # generated_data.append(entry)
+        '''for i in order:
+            rows = d.get(i)
+            if rows:
+                for row in rows:
+                    print(row)
+                    new_row = []
+                    for el in row[:-1]:
+                        new_row.append(el + epsilon)
+                    new_row.append(row[-1])
+                    generated_data.append(new_row)
+        generated_data = np.array(generated_data)'''
+        # return generated_data
+
+    def add_epsilon(self, row, epsilon):
+        r = []
+        for el in row[:-1]:
+            r.append(el + epsilon)
+        r.append(row[-1])
+        return r
+
+    def split_data_into_class_dict(self):
+        new_data = dict()
+
+        #sampled_data = self.data
+        #sampled_data = torch.tensor(sampled_data)
+        #sampled_data = torch.swapaxes(sampled_data, 1, 2)
+        #interpolated = torch.nn.functional.interpolate(sampled_data, scale_factor=2, mode='bilinear')
+        #interpolated = torch.swapaxes(interpolated, 1, 2).numpy()
+        other_data = []
+        for f in self.data:
+            cur_rows = []
+            v = int(f[0][-1])
+            for r in f:
+                value_int = int(r[-1])
+                if not new_data.get(value_int):
+                    new_data[value_int] = []
+                if int(r[-1]) != v:
+                    if v != 0:
+                        other_data.append(np.array(cur_rows))
+                    cur_rows = []
+                    v = int(r[-1])
+                cur_rows.append(r)
+                new_data[value_int].append(r)
+            if len(cur_rows) > 0 and v != 0:
+                other_data.append(np.array(cur_rows))
+
+        return new_data, other_data
+
+
+#up = UnityParser("../CSVs/experiment12.csv")
 # print(up.get_random_interval(45))
-# up.update_label_frames(225)
-
+#up.update_label_frames(225)
+#up.generate_rand()
 # for f in up:
 # print(f)
 
