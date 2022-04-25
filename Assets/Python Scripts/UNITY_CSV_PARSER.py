@@ -110,6 +110,12 @@ class UnityParser:
     def get_training_batch(self, i, j, k):
         return self.training_data[i][j:k]
 
+    def get_random_training_batch(self, length):
+        random_file_id = random.randint(0, len(self.training_data) - 1)
+        random_file_len = len(self.training_data[random_file_id])
+        random_start = random.randint(0, random_file_len - length - 1)
+        return self.training_data[random_file_id][random_start: random_start + length, :]
+
     def __len__(self):
         return len(self.data)
 
@@ -121,6 +127,11 @@ class UnityParser:
             testing_data = self.non_normalized_data[i][training_frames:, :]
             self.training_data.append(training_data)
             self.testing_data.append(testing_data)
+    def total_data(self):
+        total_data = 0
+        for i in range(len(self.data)):
+            total_data += len(self.data[i])
+        return total_data
 
 
 # up = UnityParser("../CSVs/experiment12.csv", "../CSVs/experiment1.csv")
