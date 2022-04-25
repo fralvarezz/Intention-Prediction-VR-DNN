@@ -17,6 +17,9 @@ class UnityParser:
         self.data = []
         self.max_vals = []
         self.min_vals = []
+        self.non_normalized_data = []
+        self.training_data = []
+        self.testing_data = []
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -29,6 +32,7 @@ class UnityParser:
                     keep_every = kwargs["keep_every"]
                     data = data[::keep_every, :]
 
+                self.non_normalized_data.append(data)
                 norm_data = data[:, :-1]
                 scaler = MinMaxScaler((-1, 1))
                 norm_data = scaler.fit_transform(norm_data)
@@ -47,12 +51,17 @@ class UnityParser:
                 # max_vals = data.max(axis=0)
                 # data[:, :-1] = norm_data
                 self.data.append(data)
+
+        self.generate_rand()
+        # self.normalize()
+        l = 1
+
+    def normalize(self):
         for i in range(0, len(self.data)):
             for j in range(0, len(self.data[i])):
                 for k in range(0, len(self.data[i][j])):
                     # Normalizing data on a column by column basis
                     self.data[i][j][k] = (self.data[i][j][k] - self.min_vals[k]) / (self.max_vals[k] - self.min_vals[k])
-
 
     def __iter__(self):
         for frame in self.data:
@@ -126,6 +135,15 @@ class UnityParser:
     def get_batch(self, i, j, k):
         return self.data[i][j:k]
 
+    def get_training_batch(self, i, j, k):
+        return self.training_data[i][j:k]
+
+    def get_random_training_batch(self, length):
+        random_file_id = random.randint(0, len(self.training_data) - 1)
+        random_file_len = len(self.training_data[random_file_id])
+        random_start = random.randint(0, random_file_len - length - 1)
+        return self.training_data[random_file_id][random_start: random_start + length, :]
+
     def __len__(self):
         return len(self.data)
 
@@ -136,7 +154,6 @@ class UnityParser:
         d, nonzero_list = self.split_data_into_class_dict()
         order = list(range(1, 10))
         random.shuffle(order)
-
         random.shuffle(nonzero_list)
         for segment in nonzero_list:
             entry = []
@@ -144,7 +161,7 @@ class UnityParser:
                 for r in segment:
                     entry.append(self.add_epsilon(r, epsilon))
             self.data.append(np.array(entry))
-
+            self.non_normalized_data.append(np.array(entry))
 
             # generated_data.append(entry)
         '''for i in order:
@@ -195,8 +212,29 @@ class UnityParser:
 
         return new_data, other_data
 
+    def split_data(self):
+        for i in range(len(self.data)):
+            percentage_training = 80
+            training_frames = int(len(self.data[i]) * (percentage_training / 100))
+            training_data = self.data[i][:training_frames, :]
+            testing_data = self.non_normalized_data[i][training_frames:, :]
+            self.training_data.append(training_data)
+            self.testing_data.append(testing_data)
+
+    def total_data(self):
+        total_data = 0
+        for i in range(len(self.data)):
+            total_data += len(self.data[i])
+        return total_data
+
 
 #up = UnityParser("../CSVs/experiment12.csv")
+# up = UnityParser("../CSVs/experiment12.csv", "../CSVs/experiment1.csv")
+# up.split_data()
+
+# print(len(up.data[0]))
+# print(len(up.training_data[0]))
+# print(len(up.testing_data[0]))
 # print(up.get_random_interval(45))
 #up.update_label_frames(225)
 #up.generate_rand()
