@@ -212,19 +212,37 @@ class UnityParser:
 
         return new_data, other_data
 
-    def split_data(self):
-        for i in range(len(self.data)):
-            percentage_training = 80
-            training_frames = int(len(self.data[i]) * (percentage_training / 100))
-            training_data = self.data[i][:training_frames, :]
-            testing_data = self.non_normalized_data[i][training_frames:, :]
-            self.training_data.append(training_data)
-            self.testing_data.append(testing_data)
+    def split_data(self, use_files=None):
+        if use_files is None:
+            for i in range(len(self.data)):
+                percentage_training = 80
+                training_frames = int(len(self.data[i]) * (percentage_training / 100))
+                training_data = self.data[i][:training_frames, :]
+                testing_data = self.non_normalized_data[i][training_frames:, :]
+                self.training_data.append(training_data)
+                self.testing_data.append(testing_data)
+        else:
+            print("In else")
+            all_data_idx = range(len(self.data))
+            training_file_idx = [item for item in all_data_idx if item not in use_files]
+            for i in all_data_idx:
+                if i in training_file_idx:
+                    self.training_data.append(self.data[i])
+                    print("Training file: " + str(i))
+                else:
+                    self.testing_data.append(self.data[i])
+                    print("Testing file: " + str(i))
 
     def total_data(self):
         total_data = 0
         for i in range(len(self.data)):
             total_data += len(self.data[i])
+        return total_data
+
+    def training_data_size(self):
+        total_data = 0
+        for i in range(len(self.training_data)):
+            total_data += len(self.training_data[i])
         return total_data
 
 
