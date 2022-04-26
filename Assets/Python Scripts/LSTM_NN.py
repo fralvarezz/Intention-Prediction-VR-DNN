@@ -1,3 +1,5 @@
+import os.path
+
 import sklearn.metrics
 import torch
 import torch.nn as nn
@@ -30,6 +32,9 @@ input_size = 19  # num of inputs per frame
 sequence_length = 45  # num of frames in a sequence
 hidden_size = 128
 num_layers = 2
+
+if not os.path.exists("/models"):
+    os.mkdir("/models")
 
 
 class RNN_LSTM(nn.Module):
@@ -71,12 +76,13 @@ up.generate_rand()
 '''
 frames_to_backlabel = 10
 up.full_update_label_frames()
+up.generate_rand()
+up.normalize()
 # up.generate_rand()
 up.split_data()
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
-
 
 
 def training_loop1():
@@ -210,9 +216,10 @@ def training_loop2():
                 running_correct = 0
         print(classification_report(y_true, y_pred))
         up.shuffle_data()
-        # path = './models/training_model_' + str(global_step_count)
-        # torch.save(model.cpu().state_dict(), path)
-        # model.cuda(device)
+        path = './models/training_model_' + str(global_step_count)
+        torch.save(model.cpu().state_dict(), path)
+        model.cuda(device)
+
 
 training_loop2()
 

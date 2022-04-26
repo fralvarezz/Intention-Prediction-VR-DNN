@@ -52,8 +52,7 @@ class UnityParser:
                 # data[:, :-1] = norm_data
                 self.data.append(data)
 
-        self.generate_rand()
-        # self.normalize()
+
         l = 1
 
     def normalize(self):
@@ -160,8 +159,9 @@ class UnityParser:
             if len(segment) > 5:
                 for r in segment:
                     entry.append(self.add_epsilon(r, epsilon))
-            self.data.append(np.array(entry))
-            self.non_normalized_data.append(np.array(entry))
+            if len(entry) > 0:
+                self.data.append(np.array(entry))
+                self.non_normalized_data.append(np.array(entry))
 
             # generated_data.append(entry)
         '''for i in order:
