@@ -58,7 +58,7 @@ class UnityParser:
     def normalize(self):
         for i in range(0, len(self.data)):
             for j in range(0, len(self.data[i])):
-                for k in range(0, len(self.data[i][j])):
+                for k in range(0, len(self.data[i][j]) - 1):
                     # Normalizing data on a column by column basis
                     self.data[i][j][k] = (self.data[i][j][k] - self.min_vals[k]) / (self.max_vals[k] - self.min_vals[k])
 

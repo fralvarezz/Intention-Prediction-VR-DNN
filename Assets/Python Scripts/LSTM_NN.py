@@ -24,7 +24,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 10
+num_epochs = 100
 batch_size = 1
 learning_rate = 0.0001
 
@@ -78,8 +78,10 @@ frames_to_backlabel = 10
 up.full_update_label_frames()
 up.generate_rand()
 up.normalize()
-# up.generate_rand()
 up.split_data(use_files=[8,9])
+
+print("test")
+
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
