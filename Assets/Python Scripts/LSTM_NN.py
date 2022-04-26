@@ -22,7 +22,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 20
+num_epochs = 10
 batch_size = 1
 learning_rate = 0.0001
 
@@ -72,7 +72,7 @@ up.generate_rand()
 frames_to_backlabel = 10
 up.full_update_label_frames()
 # up.generate_rand()
-up.split_data()
+up.split_data(use_files=[8,9])
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
 # TODO: Finish below
@@ -162,7 +162,7 @@ def training_loop2():
         y_pred = []
         running_loss = 0.0
         running_correct = 0
-        for k in range(up.total_data()):
+        for k in range(up.training_data_size()):
             '''
             Get and format the data
             '''
@@ -202,7 +202,7 @@ def training_loop2():
             y_pred.append(predicted.item())
             if (k + 1) % 100 == 0:
                 print(
-                    f'Epoch [{epoch + 1}/{num_epochs}], Step [{k + 1}/{up.total_data()}], Loss: {running_loss:.4f}')
+                    f'Epoch [{epoch + 1}/{num_epochs}], Step [{k + 1}/{up.training_data_size()}], Loss: {running_loss:.4f}')
                 global_step_count += 100
                 writer.add_scalar('training loss', running_loss / 100, global_step_count)
                 writer.add_scalar('accuracy', running_correct / 100, global_step_count)
