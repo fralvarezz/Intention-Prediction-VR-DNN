@@ -160,8 +160,8 @@ class UnityParser:
                 for r in segment:
                     entry.append(self.add_epsilon(r, epsilon))
             if len(entry) > 0:
-                self.data.append(np.array(entry))
-                self.non_normalized_data.append(np.array(entry))
+                self.data.append(np.array(entry, dtype=np.float32))
+                self.non_normalized_data.append(np.array(entry, dtype=np.float32))
 
             # generated_data.append(entry)
         '''for i in order:

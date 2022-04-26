@@ -82,6 +82,7 @@ up.normalize()
 up.split_data(use_files=[8,9])
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
+print("s")
 # TODO: Finish below
 
 
