@@ -20,6 +20,7 @@ class UnityParser:
         self.non_normalized_data = []
         self.training_data = []
         self.testing_data = []
+        self.validation_data = []
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -212,8 +213,8 @@ class UnityParser:
 
         return new_data, other_data
 
-    def split_data(self, use_files=None):
-        if use_files is None:
+    def split_data(self, use_training=None, use_validation=None):
+        if use_training is None:
             for i in range(len(self.data)):
                 percentage_training = 80
                 training_frames = int(len(self.data[i]) * (percentage_training / 100))
@@ -222,16 +223,19 @@ class UnityParser:
                 self.training_data.append(training_data)
                 self.testing_data.append(testing_data)
         else:
-            print("In else")
             all_data_idx = range(len(self.data))
-            training_file_idx = [item for item in all_data_idx if item not in use_files]
+            training_file_idx = [item for item in all_data_idx if item not in use_training and item not in use_validation]
             for i in all_data_idx:
                 if i in training_file_idx:
                     self.training_data.append(self.data[i])
                     print("Training file: " + str(i))
-                else:
+                elif i in use_training:
                     self.testing_data.append(self.data[i])
                     print("Testing file: " + str(i))
+                elif use_validation is not None and i in use_validation:
+                    self.testing_data.append(self.data[i])
+                    print("Validation file: " + str(i))
+
 
     def total_data(self):
         total_data = 0

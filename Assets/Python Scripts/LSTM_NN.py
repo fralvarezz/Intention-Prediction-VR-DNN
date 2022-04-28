@@ -78,14 +78,11 @@ frames_to_backlabel = 10
 up.full_update_label_frames()
 up.generate_rand()
 up.normalize()
-up.split_data(use_files=[8,9])
+up.split_data(use_training=[8,9], use_validation=[7] )
 
 print("test")
 
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
-
-# TODO: Finish below
-
 
 def training_loop1():
     frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
