@@ -34,8 +34,8 @@ sequence_length = 30  # num of frames in a sequence
 hidden_size = 128
 num_layers = 2
 
-if not os.path.exists("/models"):
-    os.mkdir("/models")
+if not os.path.exists("models"):
+    os.mkdir("models")
 
 
 class RNN_LSTM(nn.Module):
