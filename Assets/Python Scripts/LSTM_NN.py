@@ -27,9 +27,10 @@ num_classes = 10  # 9 items and None
 num_srans = 100
 batch_size = 1
 learning_rate = 0.0001
+num_epochs = 10
 
 input_size = 19  # num of inputs per frame
-sequence_length = 45  # num of frames in a sequence
+sequence_length = 30  # num of frames in a sequence
 hidden_size = 128
 num_layers = 2
 
@@ -65,22 +66,21 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
-                                  "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
-                                  "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
-                                  "../CSVs/experiment12.csv", keep_every=3)
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
+up.normalize()
+segments = up.split_data_into_segments()
+segments = up.create_buckets_from_split(segments)
+up.split_data_2(segments, .2, .1)
+
 '''
 frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
 up.generate_rand()
 '''
-frames_to_backlabel = 10
-up.full_update_label_frames()
-up.balance_data_set()
-up.normalize()
-up.split_data(use_training=[8,9], use_validation=[7] )
-
-print("test")
+#frames_to_backlabel = 10
+#up.full_update_label_frames()
+#up.balance_data_set()
+#up.split_data(use_training=[8,9], use_validation=[7] )
 
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
@@ -220,97 +220,101 @@ def training_loop2():
         torch.save(model.cpu().state_dict(), path)
         model.cuda(device)
 
-
-training_loop2()
-
-# Test the model
-# In test phase, we don't need to compute gradients (for memory efficiency)
-
-
 def validation():
+    with torch.no_grad():
+        validation_frame_timeseries_jump = 1
+
+        n_correct = 0
+        n_samples = 0
+
+        validation_y_true = []
+        validation_y_pred = []
+        for output in up.validation_data:
+            for segment in output:
+                starting_frame = 0
+                ending_frame = starting_frame + sequence_length
+
+                frame_amount = len(segment)
+                if ending_frame > frame_amount:
+                    ending_frame = frame_amount - 1
+                print(starting_frame)
+                print(ending_frame)
+
+                while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
+                    validation_data = segment[starting_frame:ending_frame, :]
+                    validation_data_no_labels = validation_data[:, :-1]
+                    validation_data_labels = validation_data[-1, [-1]]
+                    validation_data_labels = torch.from_numpy(validation_data_labels).to(device)
+                    validation_data_labels = validation_data_labels.type(torch.LongTensor).to(device)
+                    validation_data_no_labels = torch.from_numpy(validation_data_no_labels).to(device)
+                    validation_data_no_labels = validation_data_no_labels.reshape(batch_size, sequence_length, input_size)
+
+                    outputs = model(validation_data_no_labels)
+                    _, predicted = torch.max(outputs.data, 1)
+
+                    n_samples += validation_data_labels.size(0)
+                    n_correct += (predicted == validation_data_labels).sum().item()
+
+                    validation_y_true.append(validation_data_labels.item())
+                    validation_y_pred.append(predicted.item())
+
+                    starting_frame += validation_frame_timeseries_jump
+                    ending_frame = starting_frame + sequence_length
+
+        acc = 100.0 * n_correct / n_samples
+        print(f'Accuracy of the network in VALIDATION: {acc} %')
+        print(classification_report(validation_y_true, validation_y_pred))
+
+def testing():
+    # Test the model
+    # In test phase, we don't need to compute gradients (for memory efficiency)
     with torch.no_grad():
         testing_frame_timeseries_jump = 1
 
         n_correct = 0
         n_samples = 0
 
-        training_y_true = []
-        training_y_pred = []
-        for file in up.validation_data:
-
-            starting_frame = 0
-            ending_frame = starting_frame + sequence_length
-
-            frame_amount = len(file)
-            if ending_frame > frame_amount:
-                ending_frame = frame_amount - 1
-
-            while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
-                training_data = file[starting_frame:ending_frame, :]
-                training_data_no_labels = training_data[:, :-1]
-                training_data_labels = training_data[-1, [-1]]
-                training_data_labels = torch.from_numpy(training_data_labels).to(device)
-                training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
-                training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
-                training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
-
-                outputs = model(training_data_no_labels)
-                _, predicted = torch.max(outputs.data, 1)
-
-                n_samples += training_data_labels.size(0)
-                n_correct += (predicted == training_data_labels).sum().item()
-
-                training_y_true.append(training_data_labels.item())
-                training_y_pred.append(predicted.item())
-
-                starting_frame += testing_frame_timeseries_jump
+        testing_y_true = []
+        testing_y_pred = []
+        for output in up.testing_data:
+            for segment in output:
+                starting_frame = 0
                 ending_frame = starting_frame + sequence_length
 
+                frame_amount = len(segment)
+                if ending_frame > frame_amount:
+                    ending_frame = frame_amount - 1
+                print(starting_frame)
+                print(ending_frame)
+
+                while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
+                    testing_data = segment[starting_frame:ending_frame, :]
+                    testing_data_no_labels = testing_data[:, :-1]
+                    testing_data_labels = testing_data[-1, [-1]]
+                    testing_data_labels = torch.from_numpy(testing_data_labels).to(device)
+                    testing_data_labels = testing_data_labels.type(torch.LongTensor).to(device)
+                    testing_data_no_labels = torch.from_numpy(testing_data_no_labels).to(device)
+                    testing_data_no_labels = testing_data_no_labels.reshape(batch_size, sequence_length, input_size)
+
+                    outputs = model(testing_data_no_labels)
+                    _, predicted = torch.max(outputs.data, 1)
+
+                    n_samples += testing_data_labels.size(0)
+                    n_correct += (predicted == testing_data_labels).sum().item()
+
+                    testing_y_true.append(testing_data_labels.item())
+                    testing_y_pred.append(predicted.item())
+
+                    starting_frame += testing_frame_timeseries_jump
+                    ending_frame = starting_frame + sequence_length
+
         acc = 100.0 * n_correct / n_samples
-        print(f'Accuracy of the network: {acc} %')
-        print(classification_report(training_y_true, training_y_pred))
+        print(f'Accuracy of the network IN TESTING: {acc} %')
+        print(classification_report(testing_y_true, testing_y_pred))
 
-with torch.no_grad():
-    testing_frame_timeseries_jump = 1
 
-    n_correct = 0
-    n_samples = 0
-
-    training_y_true = []
-    training_y_pred = []
-    for file in up.testing_data:
-
-        starting_frame = 0
-        ending_frame = starting_frame + sequence_length
-
-        frame_amount = len(file)
-        if ending_frame > frame_amount:
-            ending_frame = frame_amount - 1
-
-        while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
-            training_data = file[starting_frame:ending_frame, :]
-            training_data_no_labels = training_data[:, :-1]
-            training_data_labels = training_data[-1, [-1]]
-            training_data_labels = torch.from_numpy(training_data_labels).to(device)
-            training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
-            training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
-            training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
-
-            outputs = model(training_data_no_labels)
-            _, predicted = torch.max(outputs.data, 1)
-
-            n_samples += training_data_labels.size(0)
-            n_correct += (predicted == training_data_labels).sum().item()
-
-            training_y_true.append(training_data_labels.item())
-            training_y_pred.append(predicted.item())
-
-            starting_frame += testing_frame_timeseries_jump
-            ending_frame = starting_frame + sequence_length
-
-    acc = 100.0 * n_correct / n_samples
-    print(f'Accuracy of the network: {acc} %')
-    print(classification_report(training_y_true, training_y_pred))
+training_loop2()
+testing()
 
 dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
 torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",

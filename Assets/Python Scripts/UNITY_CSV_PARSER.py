@@ -182,10 +182,11 @@ class UnityParser:
         return self.training_data[i][j:k]
 
     def get_random_training_batch(self, length):
-        random_file_id = random.randint(0, len(self.training_data) - 1)
-        random_file_len = len(self.training_data[random_file_id])
-        random_start = random.randint(0, random_file_len - length - 1)
-        return self.training_data[random_file_id][random_start: random_start + length, :]
+        random_output = random.randint(1, len(self.training_data) - 1)
+        random_segment = random.randint(1, len(self.training_data[random_output]) - 1)
+        segment_len = len(self.training_data[random_output][random_segment])
+        random_start = random.randint(0, segment_len - length - 1)
+        return self.training_data[random_output][random_segment][random_start: random_start + length, :]
 
     def __len__(self):
         return len(self.data)
@@ -265,13 +266,14 @@ class UnityParser:
         test_cnt = int(test_percent * data_cnt)
         validation_cnt = int(validation_percent * data_cnt)
         for class_type in splitted_data:
-            training_set = class_type[:test_cnt]
+            testing_set = class_type[:test_cnt]
             validation_set = class_type[test_cnt:test_cnt+validation_cnt]
-            testing_set = class_type[test_cnt+validation_cnt:]
+            training_set = class_type[test_cnt+validation_cnt:]
 
             self.training_data.append(training_set)
             self.validation_data.append(validation_set)
             self.testing_data.append(testing_set)
+        print("splitted data")
 
 
     def split_data(self, use_training=None, use_validation=None):
@@ -318,8 +320,9 @@ class UnityParser:
 
     def training_data_size(self):
         total_data = 0
-        for i in range(len(self.training_data)):
-            total_data += len(self.training_data[i])
+        for output in self.training_data:
+            for segment in output:
+                total_data += len(segment)
         return total_data
 
 
@@ -341,10 +344,10 @@ class UnityParser:
 # data = np.genfromtxt("formatted_success.csv", delimiter=";")
 # print(data)
 
-up = UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
-segments = up.split_data_into_segments()
-up.create_buckets_from_split(segments)
-
+# up = UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
+# segments = up.split_data_into_segments()
+# segments = up.create_buckets_from_split(segments)
+# up.split_data_2(segments, .2, .1)
 # up.full_update_label_frames()
 # up.generate_rand()
 # up.normalize()
