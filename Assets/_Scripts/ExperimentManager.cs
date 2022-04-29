@@ -53,21 +53,11 @@ public class ExperimentManager : MonoBehaviour
     
     void HighlightItem()
     {
-        if (random)
-        {
-            int randomIndex = Random.Range(0, itemsToHighlight.Count);
-            itemsToHighlight[randomIndex].GetComponent<Renderer>().material.color = Color.red;
-            itemsToHighlight[randomIndex].GetComponent<SelectableItem>().isSelected = true;
-            _highlightedItemId = randomIndex;
-            EyeLogger.Instance.objectInteractedWith = itemsToHighlight[randomIndex].name;
-        }
-        else
-        {
-            itemsToHighlight[0].GetComponent<Renderer>().material.color = Color.red;
-            itemsToHighlight[0].GetComponent<SelectableItem>().isSelected = true;
-            _highlightedItemId = 0;
-            EyeLogger.Instance.objectInteractedWith = itemsToHighlight[0].name;
-        }
+        var index = random ? Random.Range(0, itemsToHighlight.Count) : 0;
+        itemsToHighlight[index].GetComponent<Renderer>().material.color = Color.red;
+        itemsToHighlight[index].GetComponent<SelectableItem>().isSelected = true;
+        _highlightedItemId = index;
+        EyeLogger.Instance.objectInteractedWith = itemsToHighlight[index].name;
 
         _timeUntilNextItem = timeBetweenItems;
         _anyItemHighlighted = true;
