@@ -317,6 +317,7 @@ training_loop2()
 testing()
 
 dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
-torch.onnx.export(model, dummy_data, "../NN_Models/predictor_model.onnx",
+onnx_name = ("../NN_Models/model" + now + ".onnx").replace(":", ",")
+torch.onnx.export(model, dummy_data, onnx_name,
                   opset_version=9, verbose=True)
                   # Unity says opset_version=9 has the most support
