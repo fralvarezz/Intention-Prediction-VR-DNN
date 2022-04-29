@@ -99,25 +99,34 @@ class UnityParser:
         for f in self.data:
             seg = []
             for r in f:
-                i = int(r[-1])
-                if i != cur_class:
+                data_class = int(r[-1])
+                if data_class != cur_class:
+                    # cur_class = data_class
                     if len(seg) > 0:
                         if omit_zero and cur_class != 0:
-                            seg_list.append(seg)
+                            seg_list.append(np.array(seg, dtype=np.float32))
                         elif not omit_zero:
-                            seg_list.append(seg)
+                            seg_list.append(np.array(seg, dtype=np.float32))
                         seg = []
-                    cur_class = i
+                    cur_class = data_class
                 seg.append(r)
         return seg_list
 
     def create_buckets_from_split(self, splitted):
         sub_lists = [[] for x in range(10)]
         for li in splitted:
-            sub_lists[int(li[-1])].append(li)
+            sub_lists[int(li[-1][-1])].append(li)
         for sub_li in sub_lists:
             random.shuffle(sub_li)
         return sub_lists
+
+    def cnt_nonzero_entries(self):
+        cnt = 0
+        for f in self.data:
+            for r in f:
+                if int(r[-1]) != 0:
+                    cnt += 1
+        return cnt
 
     def update_label_frames(self, backtrack_frame_count):
         cur_data_slice = 0
@@ -316,14 +325,13 @@ class UnityParser:
 # data = np.genfromtxt("formatted_success.csv", delimiter=";")
 # print(data)
 
-up = UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
-                                  "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
-                                  "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
-                                  "../CSVs/experiment12.csv", keep_every=3)
+up = UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
+segments = up.split_data_into_segments()
+up.create_buckets_from_split(segments)
 
-#up.full_update_label_frames()
+# up.full_update_label_frames()
 # up.generate_rand()
-#up.normalize()
+# up.normalize()
 
 # print(up.get_class_ratio())
 # up.balance_data_set()
