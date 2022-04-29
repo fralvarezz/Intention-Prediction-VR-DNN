@@ -101,15 +101,23 @@ class UnityParser:
             for r in f:
                 i = int(r[-1])
                 if i != cur_class:
-                    cur_class = i
                     if len(seg) > 0:
                         if omit_zero and cur_class != 0:
                             seg_list.append(seg)
                         elif not omit_zero:
                             seg_list.append(seg)
                         seg = []
+                    cur_class = i
                 seg.append(r)
         return seg_list
+
+    def create_buckets_from_split(self, splitted):
+        sub_lists = [[] for x in range(10)]
+        for li in splitted:
+            sub_lists[int(li[-1])].append(li)
+        for sub_li in sub_lists:
+            random.shuffle(sub_li)
+        return sub_lists
 
     def update_label_frames(self, backtrack_frame_count):
         cur_data_slice = 0
