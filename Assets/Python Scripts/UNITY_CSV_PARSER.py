@@ -258,6 +258,22 @@ class UnityParser:
 
         return new_data, other_data
 
+    def split_data_2(self, splitted_data, test_percent, validation_percent):
+        if len(splitted_data) == 0:
+            return
+        data_cnt = len(splitted_data[1])
+        test_cnt = int(test_percent * data_cnt)
+        validation_cnt = int(validation_percent * data_cnt)
+        for class_type in splitted_data:
+            training_set = class_type[:test_cnt]
+            validation_set = class_type[test_cnt:test_cnt+validation_cnt]
+            testing_set = class_type[test_cnt+validation_cnt:]
+
+            self.training_data.append(training_set)
+            self.validation_data.append(validation_set)
+            self.testing_data.append(testing_set)
+
+
     def split_data(self, use_training=None, use_validation=None):
         if use_training is None:
             for i in range(len(self.data)):
