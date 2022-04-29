@@ -24,7 +24,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_epochs = 100
+num_srans = 100
 batch_size = 1
 learning_rate = 0.0001
 
@@ -76,7 +76,7 @@ up.generate_rand()
 '''
 frames_to_backlabel = 10
 up.full_update_label_frames()
-up.generate_rand()
+up.balance_data_set()
 up.normalize()
 up.split_data(use_training=[8,9], use_validation=[7] )
 
@@ -214,6 +214,7 @@ def training_loop2():
                 running_loss = 0.0
                 running_correct = 0
         print(classification_report(y_true, y_pred))
+        validation()
         up.shuffle_data()
         path = './models/training_model_' + str(global_step_count)
         torch.save(model.cpu().state_dict(), path)
@@ -224,6 +225,50 @@ training_loop2()
 
 # Test the model
 # In test phase, we don't need to compute gradients (for memory efficiency)
+
+
+def validation():
+    with torch.no_grad():
+        testing_frame_timeseries_jump = 1
+
+        n_correct = 0
+        n_samples = 0
+
+        training_y_true = []
+        training_y_pred = []
+        for file in up.validation_data:
+
+            starting_frame = 0
+            ending_frame = starting_frame + sequence_length
+
+            frame_amount = len(file)
+            if ending_frame > frame_amount:
+                ending_frame = frame_amount - 1
+
+            while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
+                training_data = file[starting_frame:ending_frame, :]
+                training_data_no_labels = training_data[:, :-1]
+                training_data_labels = training_data[-1, [-1]]
+                training_data_labels = torch.from_numpy(training_data_labels).to(device)
+                training_data_labels = training_data_labels.type(torch.LongTensor).to(device)
+                training_data_no_labels = torch.from_numpy(training_data_no_labels).to(device)
+                training_data_no_labels = training_data_no_labels.reshape(batch_size, sequence_length, input_size)
+
+                outputs = model(training_data_no_labels)
+                _, predicted = torch.max(outputs.data, 1)
+
+                n_samples += training_data_labels.size(0)
+                n_correct += (predicted == training_data_labels).sum().item()
+
+                training_y_true.append(training_data_labels.item())
+                training_y_pred.append(predicted.item())
+
+                starting_frame += testing_frame_timeseries_jump
+                ending_frame = starting_frame + sequence_length
+
+        acc = 100.0 * n_correct / n_samples
+        print(f'Accuracy of the network: {acc} %')
+        print(classification_report(training_y_true, training_y_pred))
 
 with torch.no_grad():
     testing_frame_timeseries_jump = 1

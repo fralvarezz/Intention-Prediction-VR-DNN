@@ -85,6 +85,32 @@ class UnityParser:
             n += len(d)
         return n
 
+    def get_class_ratio(self):
+        classes = np.zeros(10)
+        for f in self.data:
+            for r in f:
+                i = int(r[-1])
+                classes[i] += 1
+        return classes
+
+    def split_data_into_segments(self, omit_zero=True):
+        seg_list = []
+        cur_class = 0
+        for f in self.data:
+            seg = []
+            for r in f:
+                i = int(r[-1])
+                if i != cur_class:
+                    cur_class = i
+                    if len(seg) > 0:
+                        if omit_zero and cur_class != 0:
+                            seg_list.append(seg)
+                        elif not omit_zero:
+                            seg_list.append(seg)
+                        seg = []
+                seg.append(r)
+        return seg_list
+
     def update_label_frames(self, backtrack_frame_count):
         cur_data_slice = 0
         for data in self.data:
@@ -97,8 +123,8 @@ class UnityParser:
                     if self.data[cur_data_slice][n][-1] == 0:
                         self.data[cur_data_slice][n][-1] = used_tag
                         cur_backtrack_count += 1
-                    else:
                         print("Found nonezero while backtracking, backtrack_frame_count probably too high!")
+                    else:
                         is_backtracking = False
                 if frame[-1] != 0 and not is_backtracking:
                     is_backtracking = True
@@ -147,11 +173,19 @@ class UnityParser:
     def __len__(self):
         return len(self.data)
 
-    def generate_rand(self, epsilon=None):
+    def generate_rand(self, epsilon=None, single_class=None):
         if not epsilon:
             epsilon = random.uniform(-1, 1)
         generated_data = []
         d, nonzero_list = self.split_data_into_class_dict()
+        if single_class:
+            entry = []
+            for r in d[single_class]:
+                entry.append(self.add_epsilon(r, epsilon))
+            if len(entry) > 0:
+                self.data.append(np.array(entry, dtype=np.float32))
+                self.non_normalized_data.append(np.array(entry, dtype=np.float32))
+                return
         order = list(range(1, 10))
         random.shuffle(order)
         random.shuffle(nonzero_list)
@@ -187,12 +221,6 @@ class UnityParser:
 
     def split_data_into_class_dict(self):
         new_data = dict()
-
-        #sampled_data = self.data
-        #sampled_data = torch.tensor(sampled_data)
-        #sampled_data = torch.swapaxes(sampled_data, 1, 2)
-        #interpolated = torch.nn.functional.interpolate(sampled_data, scale_factor=2, mode='bilinear')
-        #interpolated = torch.swapaxes(interpolated, 1, 2).numpy()
         other_data = []
         for f in self.data:
             cur_rows = []
@@ -236,6 +264,18 @@ class UnityParser:
                     self.testing_data.append(self.data[i])
                     print("Validation file: " + str(i))
 
+    def populate_smallest_sample(self):
+        cls_ratios = self.get_class_ratio()
+        min_index = np.where(cls_ratios == np.amin(cls_ratios))[0][0]
+        self.generate_rand(single_class=min_index)
+
+    def balance_data_set(self):
+        max_val = max(self.get_class_ratio())
+        cond = True
+        while cond:
+            self.populate_smallest_sample()
+            if min(self.get_class_ratio()) >= max_val:
+                cond = False
 
     def total_data(self):
         total_data = 0
@@ -267,3 +307,17 @@ class UnityParser:
 
 # data = np.genfromtxt("formatted_success.csv", delimiter=";")
 # print(data)
+
+up = UnityParser("../CSVs/experiment1.csv", "../CSVs/experiment2.csv", "../CSVs/experiment3.csv",
+                                  "../CSVs/experiment4.csv", "../CSVs/experiment6.csv", "../CSVs/experiment7.csv",
+                                  "../CSVs/experiment9.csv", "../CSVs/experiment10.csv", "../CSVs/experiment11.csv",
+                                  "../CSVs/experiment12.csv", keep_every=3)
+
+#up.full_update_label_frames()
+# up.generate_rand()
+#up.normalize()
+
+# print(up.get_class_ratio())
+# up.balance_data_set()
+# print(up.get_class_ratio())
+
