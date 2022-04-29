@@ -20,16 +20,15 @@ public class EyeManager : MonoBehaviour
     private Vector3 _gazePoint;
     private string _gazeObjectName;
 
-    private bool _started;
+    public bool shouldCalibrate;
 
     void Start()
     {
         if (!SRanipal_Eye_Framework.Instance.EnableEye)
-        {
             enabled = false;
-        }
 
-        _started = true;
+        if(shouldCalibrate)
+            SRanipal_Eye.LaunchEyeCalibration();
     }
 
     void Update()
@@ -84,9 +83,6 @@ public class EyeManager : MonoBehaviour
         }
         
         eyeLogger.Log(_gazeVector, _gazePoint, _gazeObjectName);
-        
-        //if(_gazeObjectName != "")
-            //Debug.Log($"From EyeManager UPDATE(), logging {_gazeVector}, {_gazePoint}, {_gazeObjectName}");
         
     }
     

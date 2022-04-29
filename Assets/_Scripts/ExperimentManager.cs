@@ -18,7 +18,7 @@ public class ExperimentManager : MonoBehaviour
     private bool _anyItemHighlighted;
     public bool random;
     public bool isGuided;
-    public bool shouldLoop;
+    public int loopCount;
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class ExperimentManager : MonoBehaviour
     void Start()
     {
         _timeUntilNextItem = timeBetweenItems;
-        itemsToHighlight = items;
+        itemsToHighlight = new List<GameObject>(items);
     }
 
     void Update()
@@ -53,7 +53,7 @@ public class ExperimentManager : MonoBehaviour
     
     void HighlightItem()
     {
-        var index = random ? Random.Range(0, itemsToHighlight.Count) : 0;
+        var index = random ? Random.Range(0, itemsToHighlight.Count - 1) : 0;
         itemsToHighlight[index].GetComponent<Renderer>().material.color = Color.red;
         itemsToHighlight[index].GetComponent<SelectableItem>().isSelected = true;
         _highlightedItemId = index;
@@ -70,9 +70,11 @@ public class ExperimentManager : MonoBehaviour
         EyeLogger.Instance.objectInteractedWith = "";
         _anyItemHighlighted = false;
         
-        if(itemsToHighlight.Count == 0 && shouldLoop)
+        if(itemsToHighlight.Count == 0 && loopCount > 0)
         {
-            itemsToHighlight = items;
+            itemsToHighlight = new List<GameObject>(items);
+            Debug.Log("Restarted the experiment, items to highlight count : " + itemsToHighlight.Count);
+            loopCount--;
         }
     }
 }

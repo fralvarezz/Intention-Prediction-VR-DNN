@@ -14,7 +14,7 @@ public class EyeLogger : MonoBehaviour
         Logging
     }
 
-    private LoggerState state;
+    public LoggerState state;
     
     // Stream Writer variables:
     private StreamWriter writer;
@@ -39,7 +39,7 @@ public class EyeLogger : MonoBehaviour
     //Gaze
     private Vector3 gazeVector;
     private Vector3 gazePoint;
-    private string gazeObjectTag;
+    private string gazeObjectTag = "";
 
     public string objectInteractedWith = "";
     
@@ -85,7 +85,7 @@ public class EyeLogger : MonoBehaviour
     
     void Start()
     {
-        state = LoggerState.Inference;
+        //state = LoggerState.Inference;
         capturedFrames = 0;
         dataIsReady = false;
         
@@ -328,7 +328,10 @@ public class EyeLogger : MonoBehaviour
 
     private int TagToInt(string objectTag)
     {
-        if (objectTag == null || !nameToIntDict.ContainsKey(objectTag))
+        if(objectTag == null)
+            throw new Exception("TagToInt: objectTag is null");
+        
+        if (!nameToIntDict.ContainsKey(objectTag))
             throw new Exception($"{objectTag} not available in tags dictionary");
 
         return nameToIntDict[objectTag];

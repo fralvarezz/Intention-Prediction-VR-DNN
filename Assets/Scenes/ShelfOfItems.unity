@@ -653,6 +653,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 6144
   lookableObjectTag: LookableObject
+  shouldCalibrate: 1
 --- !u!4 &128258467
 Transform:
   m_ObjectHideFlags: 0
@@ -755,7 +756,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &161869131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1089,9 +1090,10 @@ MonoBehaviour:
   - {fileID: 828562038}
   - {fileID: 995682709}
   - {fileID: 278710672}
-  timeBetweenItems: 5
+  timeBetweenItems: 7
   random: 1
   isGuided: 1
+  loopCount: 10
 --- !u!1 &412517615 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1507151385514578, guid: 4b7e2afae84d5aa4b881c4348964870b, type: 3}
@@ -1594,7 +1596,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 633198715}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.731, y: 0.42, z: 1.4}
+  m_LocalPosition: {x: -2.003, y: 0.118, z: 1.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1217196855}
@@ -1644,6 +1646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 183620b4e2d400047a35ff0d92e29418, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 1
   player: {fileID: 1718910543}
   rightHand: {fileID: 1315636270}
   leftHand: {fileID: 1778193053}
