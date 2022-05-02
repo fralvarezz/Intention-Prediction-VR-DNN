@@ -53,9 +53,6 @@ class UnityParser:
                 # data[:, :-1] = norm_data
                 self.data.append(data)
 
-
-        l = 1
-
     def normalize(self):
         for i in range(0, len(self.data)):
             for j in range(0, len(self.data[i])):
@@ -178,15 +175,18 @@ class UnityParser:
     def get_batch(self, i, j, k):
         return self.data[i][j:k]
 
-    def get_training_batch(self, i, j, k):
-        return self.training_data[i][j:k]
+    def get_training_batch(self, i, j):
+        return self.training_data[i][j]
 
-    def get_random_training_batch(self, length):
+    def get_random_training_segment(self, length=0):
         random_output = random.randint(1, len(self.training_data) - 1)
         random_segment = random.randint(1, len(self.training_data[random_output]) - 1)
         segment_len = len(self.training_data[random_output][random_segment])
         random_start = random.randint(0, segment_len - length - 1)
-        return self.training_data[random_output][random_segment][random_start: random_start + length, :]
+        if length == 0:
+            return self.training_data[random_output][random_segment][:, :]
+        else:
+            return self.training_data[random_output][random_segment][random_start: random_start + length, :]
 
     def __len__(self):
         return len(self.data)
@@ -215,20 +215,6 @@ class UnityParser:
             if len(entry) > 0:
                 self.data.append(np.array(entry, dtype=np.float32))
                 self.non_normalized_data.append(np.array(entry, dtype=np.float32))
-
-            # generated_data.append(entry)
-        '''for i in order:
-            rows = d.get(i)
-            if rows:
-                for row in rows:
-                    print(row)
-                    new_row = []
-                    for el in row[:-1]:
-                        new_row.append(el + epsilon)
-                    new_row.append(row[-1])
-                    generated_data.append(new_row)
-        generated_data = np.array(generated_data)'''
-        # return generated_data
 
     def add_epsilon(self, row, epsilon):
         r = []
@@ -267,14 +253,13 @@ class UnityParser:
         validation_cnt = int(validation_percent * data_cnt)
         for class_type in splitted_data:
             testing_set = class_type[:test_cnt]
-            validation_set = class_type[test_cnt:test_cnt+validation_cnt]
-            training_set = class_type[test_cnt+validation_cnt:]
+            validation_set = class_type[test_cnt:test_cnt + validation_cnt]
+            training_set = class_type[test_cnt + validation_cnt:]
 
             self.training_data.append(training_set)
             self.validation_data.append(validation_set)
             self.testing_data.append(testing_set)
         print("splitted data")
-
 
     def split_data(self, use_training=None, use_validation=None):
         if use_training is None:
@@ -287,7 +272,8 @@ class UnityParser:
                 self.testing_data.append(testing_data)
         else:
             all_data_idx = range(len(self.data))
-            training_file_idx = [item for item in all_data_idx if item not in use_training and item not in use_validation]
+            training_file_idx = [item for item in all_data_idx if
+                                 item not in use_training and item not in use_validation]
             for i in all_data_idx:
                 if i in training_file_idx:
                     self.training_data.append(self.data[i])
@@ -325,8 +311,7 @@ class UnityParser:
                 total_data += len(segment)
         return total_data
 
-
-#up = UnityParser("../CSVs/experiment12.csv")
+# up = UnityParser("../CSVs/experiment12.csv")
 # up = UnityParser("../CSVs/experiment12.csv", "../CSVs/experiment1.csv")
 # up.split_data()
 
@@ -334,8 +319,8 @@ class UnityParser:
 # print(len(up.training_data[0]))
 # print(len(up.testing_data[0]))
 # print(up.get_random_interval(45))
-#up.update_label_frames(225)
-#up.generate_rand()
+# up.update_label_frames(225)
+# up.generate_rand()
 # for f in up:
 # print(f)
 
@@ -355,4 +340,3 @@ class UnityParser:
 # print(up.get_class_ratio())
 # up.balance_data_set()
 # print(up.get_class_ratio())
-

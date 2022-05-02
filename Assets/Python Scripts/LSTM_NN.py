@@ -84,80 +84,6 @@ up.generate_rand()
 
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
-def training_loop1():
-    frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
-    global_step_count = 0
-
-    for epoch in range(num_epochs):
-        data_size = len(up)
-        y_true = []
-        y_pred = []
-        for k in range(data_size):
-            running_loss = 0.0
-            running_correct = 0
-
-            starting_frame = 0
-            ending_frame = starting_frame + sequence_length
-            frame_amount = len(up.training_data[k])
-            if ending_frame > frame_amount:
-                ending_frame = frame_amount - 1
-
-            while ending_frame < frame_amount:  # while there are frames left in the data
-                '''
-                Get and format the data
-                '''
-                frames_batch = up.get_training_batch(k, starting_frame, ending_frame)
-                frames_batch_no_labels = frames_batch[:, :-1]
-
-                # scaler = MinMaxScaler((-1, 1))
-                # frames_batch_no_labels = scaler.fit_transform(frames_batch_no_labels)
-
-                labels = frames_batch[-1, [-1]]
-                frames_batch_no_labels = torch.from_numpy(frames_batch_no_labels).to(device)
-                labels = torch.from_numpy(labels).to(device)
-                labels = labels.type(torch.LongTensor).to(device)
-                frames_batch_no_labels = frames_batch_no_labels.reshape(batch_size, sequence_length, input_size)
-
-                # frames_batch shape is [batch_size, sequence_length, input_size]
-
-                # Forward pass
-
-                optimizer.zero_grad()
-                outputs = model(frames_batch_no_labels)
-                one_hot_labels = fn.one_hot(labels, num_classes).float()
-                loss = criterion(outputs, one_hot_labels)
-                loss.backward()
-
-                # Something Jonas made
-                threshold = 10
-                torch.nn.utils.clip_grad_norm_(model.parameters(), threshold)
-
-                optimizer.step()
-
-                # print statistics
-                starting_frame += frame_timeseries_jump
-                ending_frame = starting_frame + sequence_length
-
-                running_loss += loss.item()
-                _, predicted = torch.max(outputs.data, 1)
-                running_correct += (predicted == labels).sum().item()
-                y_true.append(labels.item())
-                y_pred.append(predicted.item())
-                if (starting_frame + 1) % 100 == 0:
-                    print(f'Epoch [{epoch + 1}/{num_epochs}], File [{k+1}/{data_size}], Step [{starting_frame + 1}/{frame_amount - sequence_length}], Loss: {running_loss:.4f}')
-                    global_step_count += 100
-                    writer.add_scalar('training loss', running_loss / 100, global_step_count)
-                    writer.add_scalar('accuracy', running_correct / 100, global_step_count)
-                    running_loss = 0.0
-                    running_correct = 0
-        print(classification_report(y_true, y_pred))
-        up.shuffle_data()
-        #path = './models/training_model_' + str(global_step_count)
-        #torch.save(model.cpu().state_dict(), path)
-        #model.cuda(device)
-
-    writer.close()
-
 def training_loop2():
     frame_timeseries_jump = 1  # if 1: [1,2,3,4] => [2,3,4,5]       if 10: [1,2,3,4] => [11,12,13,14]
     global_step_count = 0
@@ -171,7 +97,7 @@ def training_loop2():
             '''
             Get and format the data
             '''
-            frames_batch = up.get_random_training_batch(sequence_length)
+            frames_batch = up.get_random_training_segment(sequence_length)
             frames_batch_no_labels = frames_batch[:, :-1]
 
             # scaler = MinMaxScaler((-1, 1))
@@ -237,8 +163,6 @@ def validation():
                 frame_amount = len(segment)
                 if ending_frame > frame_amount:
                     ending_frame = frame_amount - 1
-                print(starting_frame)
-                print(ending_frame)
 
                 while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
                     validation_data = segment[starting_frame:ending_frame, :]
