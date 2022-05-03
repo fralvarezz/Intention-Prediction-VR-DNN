@@ -21,6 +21,7 @@ class UnityParser:
         self.training_data = []
         self.testing_data = []
         self.validation_data = []
+        self.training_indices = []
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -178,15 +179,15 @@ class UnityParser:
     def get_training_batch(self, i, j):
         return self.training_data[i][j]
 
-    def get_random_training_segment(self, length=0):
-        random_output = random.randint(1, len(self.training_data) - 1)
-        random_segment = random.randint(1, len(self.training_data[random_output]) - 1)
-        segment_len = len(self.training_data[random_output][random_segment])
-        random_start = random.randint(0, segment_len - length - 1)
-        if length == 0:
-            return self.training_data[random_output][random_segment][:, :]
-        else:
-            return self.training_data[random_output][random_segment][random_start: random_start + length, :]
+    def get_random_training_segment(self, sequence_length):
+        possible_outputs = [x for x in range(len(self.training_indices)) if any(self.training_indices[x])]
+        random_output = random.choice(possible_outputs)
+        possible_segments = [x for x in range(len(self.training_indices[random_output])) if len(self.training_indices[random_output][x]) > 0]
+        random_segment = random.choice(possible_segments)
+        starting_frame = random.choice(self.training_indices[random_output][random_segment])
+        self.training_indices[random_output][random_segment].remove(starting_frame)
+        #print("accesing training data: " + str(random_output) + " " + str(random_segment) + " " + str(starting_frame) + "with length " + str(len(self.training_data[random_output][random_segment])))
+        return self.training_data[random_output][random_segment][starting_frame: starting_frame + sequence_length, :]
 
     def __len__(self):
         return len(self.data)
@@ -261,6 +262,14 @@ class UnityParser:
             self.testing_data.append(testing_set)
         print("splitted data")
 
+    def generate_training_indices(self, sequence_length):
+        self.training_indices = [[] for _ in range(10)]
+        for i in range(len(self.training_data)):
+            len_training = len(self.training_data[i])
+            self.training_indices[i] = [[] for _ in range(len_training)]
+            for j in range(len(self.training_data[i])):
+                self.training_indices[i][j] = list(range(len(self.training_data[i][j]) - sequence_length))
+
     def split_data(self, use_training=None, use_validation=None):
         if use_training is None:
             for i in range(len(self.data)):
@@ -306,7 +315,7 @@ class UnityParser:
 
     def training_data_size(self):
         total_data = 0
-        for output in self.training_data:
+        for output in self.training_indices:
             for segment in output:
                 total_data += len(segment)
         return total_data

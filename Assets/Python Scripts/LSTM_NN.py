@@ -30,7 +30,7 @@ learning_rate = 0.0001
 num_epochs = 10
 
 input_size = 19  # num of inputs per frame
-sequence_length = 30  # num of frames in a sequence
+sequence_length = 45  # num of frames in a sequence
 hidden_size = 128
 num_layers = 2
 
@@ -66,7 +66,7 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv", keep_every=2)
 up.normalize()
 segments = up.split_data_into_segments()
 segments = up.create_buckets_from_split(segments)
@@ -89,11 +89,13 @@ def training_loop2():
     global_step_count = 0
 
     for epoch in range(num_epochs):
+        up.generate_training_indices(sequence_length)
         y_true = []
         y_pred = []
         running_loss = 0.0
         running_correct = 0
-        for k in range(up.training_data_size()):
+        training_data_size = up.training_data_size()
+        for k in range(training_data_size):
             '''
             Get and format the data
             '''
@@ -133,7 +135,7 @@ def training_loop2():
             y_pred.append(predicted.item())
             if (k + 1) % 100 == 0:
                 print(
-                    f'Epoch [{epoch + 1}/{num_epochs}], Step [{k + 1}/{up.training_data_size()}], Loss: {running_loss:.4f}')
+                    f'Epoch [{epoch + 1}/{num_epochs}], Step [{k + 1}/{training_data_size}], Loss: {running_loss:.4f}')
                 global_step_count += 100
                 writer.add_scalar('training loss', running_loss / 100, global_step_count)
                 writer.add_scalar('accuracy', running_correct / 100, global_step_count)
