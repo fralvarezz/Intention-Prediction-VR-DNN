@@ -18,6 +18,10 @@ public class IntentionPredictor : MonoBehaviour
     private PredictedHighlighter highlighter;
 
     public TextMeshProUGUI textMeshProUGUI;
+    public bool isTesting;
+
+    [Button("PredictFromCSV", "Predict from CSV", false)]
+    public string name;
 
     /// <summary>
     /// A struct used for holding the results of our prediction in a way that's easy to view from the inspector.
@@ -58,14 +62,17 @@ public class IntentionPredictor : MonoBehaviour
     {
         if(!EyeLogger.Instance.dataIsReady)
             return;
-        
+
+        if (isTesting)
+            return;
+
         Debug.Log("Data was available!");
         float[,] input = EyeLogger.Instance.GetData();
         //print(input.GetLength(0));
         //print(input.GetLength(1));
         
         // TODO: I find unlikely that this worked first try
-        Tensor inputTensor = new Tensor(new TensorShape(1,1,19,1), input);
+        Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
 
         Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
         
@@ -94,6 +101,12 @@ public class IntentionPredictor : MonoBehaviour
     {
         highlighter.Highlight(GetPredictedObject());
         textMeshProUGUI.text = "Predicted:" + prediction.predictedValue.ToString();
+    }
+
+    public void PredictFromCSV()
+    {
+        var data = CSVParser.ParseCSV();
+        Debug.Log(data[3][0].GetLength(0));
     }
     
 }
