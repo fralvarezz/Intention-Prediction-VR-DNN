@@ -23,12 +23,6 @@ public class CSVParser
                 csvLine[13], csvLine[14], csvLine[15], csvLine[16], csvLine[17], csvLine[18], csvLine[19], csvLine[20],
                 csvLine[21], csvLine[22], csvLine[23], csvLine[24]
             };
-
-            //replaces commas with dots in csvLine
-            for (int i = 0; i < csvLine.Length; i++)
-            {
-                csvLine[i] = csvLine[i].Replace(',', '.');
-            }
             if(csvLine[csvLine.Length - 1] != "0")
             {
                 parsedData.Add(csvLine.Select(float.Parse).ToArray());
@@ -57,7 +51,6 @@ public class CSVParser
         {
             if ((int) parsedData[i][parsedData[i].Length - 1] == currentClass) continue;
             
-            //Debug.Log("Class: " + currentClass);
             if (lookingForLastIndex)
             {
                 int previousClass = (int) parsedData[i - 1][parsedData[i - 1].Length - 1];
@@ -67,8 +60,6 @@ public class CSVParser
                 {
                     for (int k = 0; k < parsedData[j].Length; k++)
                     {
-                        //Debug.Log($"{initialIndex}, {i}");
-                        //Debug.Log(parsedData[j][k]);
                         segment[j - initialIndex, k] = parsedData[j][k];
                     }
                 }

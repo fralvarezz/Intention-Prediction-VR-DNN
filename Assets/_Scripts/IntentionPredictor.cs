@@ -105,8 +105,34 @@ public class IntentionPredictor : MonoBehaviour
 
     public void PredictFromCSV()
     {
+        runtimeModel = ModelLoader.Load(modelAsset);
+        worker = WorkerFactory.CreateWorker(runtimeModel, WorkerFactory.Device.GPU);
+        
+        // Instantiate the prediction struct.
+        prediction = new Prediction();
+        
         var data = CSVParser.ParseCSV();
-        Debug.Log(data[3][0].GetLength(0));
+
+        float[,] input = new float[45, data[3][0].GetLength(1)];
+        
+        for (int i = 0; i < 45; i++)
+        {
+            for (int j = 0; j < data[3][0].GetLength(1); j++)
+            {
+                input[i, j] = data[3][0][i, j];
+            }
+        }
+        
+        Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
+
+        Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
+        
+        prediction.SetPrediction(outputTensor);
+        Debug.Log($"Predicted {GetPredictedObject()}");
+        
+        inputTensor.Dispose();
+        outputTensor.Dispose();
+
     }
     
 }
