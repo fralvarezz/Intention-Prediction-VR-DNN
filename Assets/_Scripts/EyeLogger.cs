@@ -45,6 +45,56 @@ public class EyeLogger : MonoBehaviour
     
     private static EyeLogger _instance;
 
+    private bool USE_REG = true;
+    
+    private List<float> minVals = new List<float>()
+    {
+        -0.8447f,
+        0.3382f,
+        -0.3764f,
+        -2.92f,
+        -1.3614f,
+        -0.358f,
+        -0.9971f,
+        -0.6687f,
+        -0.9999f,
+        -1.0f,
+        -1.0f,
+        -1.0f,
+        -5.15f,
+        -0.4183f,
+        0.0f,
+        0.0f,
+        -3419625.0f,
+        -2735984.0f,
+        -1.5f,
+        0.0f
+    };
+
+    private List<float> maxVals = new List<float>()
+    {
+        0.5001f, 
+        1.0f, 
+        0.6271f, 
+        0.4839f, 
+        0.3688f, 
+        1.23f, 
+        0.7585f, 
+        1.0f, 
+        0.2298f,
+        0.5054f, 
+        0.423f, 
+        1.0f,
+        0.0f, 
+        1.7237f,
+        20.0f, 
+        9.0f, 
+        2204.172f, 
+        83815.45f, 
+        18.8792f, 
+        9.0f
+    };
+    
     private Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
     {
         {"None", 0},
@@ -238,6 +288,14 @@ public class EyeLogger : MonoBehaviour
         loggedData[loggedDataLastFrameIdx, 17] = pixelPositionObject.y;
         loggedData[loggedDataLastFrameIdx, 18] = pixelPositionObject.z;
 
+        if (USE_REG)
+        {
+            for (int i = 0; i < 19; i++)
+            {
+                loggedData[loggedDataLastFrameIdx, i] = Reg(loggedData[loggedDataLastFrameIdx, i], minVals[i], maxVals[i]);
+            }
+        }
+        
         // check if data is ready to be collected
         capturedFrames++;
         if (capturedFrames == sequenceLength)
@@ -251,6 +309,12 @@ public class EyeLogger : MonoBehaviour
         }
     }
 
+    private float Reg(float val, float min, float max)
+    {
+        return (val - min) / (max - min);
+    }
+    
+    
     private Vector3 GetRelativePosition(Transform origin, Vector3 position)
     {
         Vector3 distance = position - origin.position;
