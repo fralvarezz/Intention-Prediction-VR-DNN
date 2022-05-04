@@ -59,6 +59,9 @@ public class EyeManager : MonoBehaviour
         //Gets the Gaze Ray
         SRanipal_Eye.GetVerboseData(out var data);
         _gazeVector = data.combined.eye_data.gaze_direction_normalized;
+        //convert gazeVector from right handed to left handed
+        _gazeVector = new Vector3(-_gazeVector.x, _gazeVector.y, _gazeVector.z);
+        Debug.DrawRay(Camera.main.transform.position, _gazeVector * MaxDistance, Color.red);
         
         //Casts the Gaze Ray casted and returns the position of the object hit
         Ray gazeRay;
@@ -72,12 +75,14 @@ public class EyeManager : MonoBehaviour
         {
             if (FocusInfo.transform.gameObject.CompareTag("LookableObject") || FocusInfo.transform.gameObject.CompareTag("Shelf"))
             {
-                _gazePoint = FocusInfo.transform.position;
+                _gazePoint = FocusInfo.point;
+                //Debug.Log("Gaze point: " + _gazePoint);
                 _gazeObjectName = FocusInfo.transform.name;
             }
         }
         else
         {
+            //Debug.Log("Didnt find a gaze point. Using default values.");
             _gazePoint = gazeRay.GetPoint(MaxDistance);
             _gazeObjectName = "";
         }

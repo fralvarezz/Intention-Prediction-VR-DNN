@@ -288,8 +288,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 64501360840773712, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 64501360840773712, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
@@ -591,7 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6980bc734a6186149bef2b7ea64ffecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modelAsset: {fileID: 5022602860645237092, guid: 95c5713e911215e40a0dc6404d11b082, type: 3}
+  modelAsset: {fileID: 5022602860645237092, guid: 30932a3711eba2a43b41bdf12916bc48, type: 3}
   objects:
   - {fileID: 907835082}
   - {fileID: 2095676209}
@@ -603,9 +607,21 @@ MonoBehaviour:
   - {fileID: 995682709}
   - {fileID: 278710672}
   textMeshProUGUI: {fileID: 2029831224}
+  isTesting: 0
+  name: 
   prediction:
-    predictedValue: 0
-    predicted: []
+    predictedValue: 2
+    predicted:
+    - -0.25664264
+    - 0.4075161
+    - 11.54011
+    - -6.258997
+    - 2.2860978
+    - 0.9353722
+    - -1.6355296
+    - 10.071831
+    - -8.208492
+    - -4.0529795
 --- !u!114 &121109604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1053,7 +1069,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &412352006
 Transform:
   m_ObjectHideFlags: 0
@@ -1119,6 +1135,48 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 412517615}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!1 &424383101 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+  m_PrefabInstance: {fileID: 19201048}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &424383102
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424383101}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!1 &433395165 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+  m_PrefabInstance: {fileID: 1504185973}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &433395166
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 433395165}
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
@@ -1545,7 +1603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 64501360840773712, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
@@ -1651,6 +1709,7 @@ MonoBehaviour:
   rightHand: {fileID: 1315636270}
   leftHand: {fileID: 1778193053}
   objectInteractedWith: 
+  USE_REG: 1
   sequenceLength: 1
   inputLength: 19
   dataIsReady: 0
@@ -1668,7 +1727,7 @@ BoxCollider:
   m_GameObject: {fileID: 652578024}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 2.4999933, y: 2.9969995, z: 0.16360474}
   m_Center: {x: -1.2499967, y: 1.4984998, z: 0.08180359}
@@ -2895,7 +2954,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 64501360840773712, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
@@ -3439,7 +3498,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 64501360840773712, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
@@ -3903,6 +3962,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isSelected: 0
+--- !u!1 &1830287226 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+  m_PrefabInstance: {fileID: 1201554868}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &1830287227
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1830287226}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &1859794948
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4653,6 +4733,27 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2122024398}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!1 &2122578899 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1185724528154638, guid: 4ac1a07cc86258541aa0b1d5264cc591, type: 3}
+  m_PrefabInstance: {fileID: 563585349}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &2122578900
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122578899}
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0

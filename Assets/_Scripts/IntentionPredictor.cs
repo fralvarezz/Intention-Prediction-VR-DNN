@@ -115,11 +115,53 @@ public class IntentionPredictor : MonoBehaviour
         
         var data = CSVParser.ParseCSV();
 
-        float[,] input = new float[45, data[3][0].GetLength(1)];
+        int numCorrect = 0;
+        int numTotal = 0;
+        foreach (var output in data)
+        {
+            if(output.Count == 0)
+                continue;
+            for (int i = 0; i < 2; i++)
+            {
+                var segment = output[i];
+                int startingFrame = 0;
+                int endingFrame = startingFrame + 45;
+                float[,] input = new float[45, segment.GetLength(1) - 1];
+                while (endingFrame < segment.GetLength(0))
+                {
+                    for (int j = startingFrame; j < endingFrame; j++)
+                    {
+                        for (int k = 0; k < segment.GetLength(1) - 1; k++)
+                        {
+                            input[j - startingFrame, k] = segment[j, k];
+                        }
+                    }
+                    Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
+
+                    Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
+                    prediction.SetPrediction(outputTensor);
+                    Debug.Log("Predicted " + prediction.predictedValue + ". Actual: " + segment[endingFrame, segment.GetLength(1) - 1]);
+                    if(prediction.predictedValue == (int)segment[endingFrame, segment.GetLength(1) - 1])
+                    {
+                        numCorrect++;
+                    }
+                    numTotal++;
+
+                    startingFrame += 1;
+                    endingFrame = startingFrame + 45;
+                    inputTensor.Dispose();
+                    outputTensor.Dispose();
+                }
+            }
+        }
+        Debug.Log("Num correct: " + numCorrect + " out of " + numTotal);
+        Debug.Log("Accuracy: " + ((float)numCorrect / (float)numTotal) * 100 + "%");
+        
+        /*float[,] input = new float[45, data[3][0].GetLength(1) - 1];
         
         for (int i = 0; i < 45; i++)
         {
-            for (int j = 0; j < data[3][0].GetLength(1); j++)
+            for (int j = 0; j < data[3][0].GetLength(1) - 1; j++)
             {
                 input[i, j] = data[3][0][i, j];
             }
@@ -134,7 +176,7 @@ public class IntentionPredictor : MonoBehaviour
         
         inputTensor.Dispose();
         outputTensor.Dispose();
-
+        */     
     }
     
 }

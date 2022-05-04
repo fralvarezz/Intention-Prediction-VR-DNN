@@ -252,7 +252,7 @@ public class EyeLogger : MonoBehaviour
 
         writer.WriteLine(GetLogAsString());
         
-        if(!ExperimentManager.instance.isGuided)
+        if(ExperimentManager.instance == null || !ExperimentManager.instance.isGuided)
             objectInteractedWith = "";
 
     }
@@ -329,6 +329,9 @@ public class EyeLogger : MonoBehaviour
         Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
         Vector3 rightHandUp = rightHand.transform.up;
         Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
+        Vector3 viewPortPositionObject = Camera.main.WorldToViewportPoint(gazePoint);
+        //Debug.Log("Pixel position of object: " + pixelPositionObject);
+        //Debug.Log("Viewport position of object: " + viewPortPositionObject);
 
         //Add last frame to the end of the array
         //Didn't find a more performant way to do it
