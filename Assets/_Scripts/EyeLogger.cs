@@ -45,7 +45,7 @@ public class EyeLogger : MonoBehaviour
     
     private static EyeLogger _instance;
 
-    private bool USE_REG = true;
+    [SerializeField]private bool USE_REG = true;
     
     private List<float> minVals = new List<float>()
     {
@@ -297,7 +297,7 @@ public class EyeLogger : MonoBehaviour
         }
         
         // check if data is ready to be collected
-        capturedFrames++;
+        /*capturedFrames++;
         if (capturedFrames == sequenceLength)
         {
             dataIsReady = true;
@@ -306,7 +306,7 @@ public class EyeLogger : MonoBehaviour
         else
         {
             dataIsReady = false;
-        }
+        }*/
     }
 
     private float Reg(float val, float min, float max)
