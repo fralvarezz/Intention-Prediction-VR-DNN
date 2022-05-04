@@ -74,6 +74,8 @@ public class IntentionPredictor : MonoBehaviour
         // TODO: I find unlikely that this worked first try
         Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
 
+        
+        
         Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
         
         prediction.SetPrediction(outputTensor);

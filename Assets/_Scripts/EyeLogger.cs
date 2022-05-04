@@ -45,7 +45,15 @@ public class EyeLogger : MonoBehaviour
     
     private static EyeLogger _instance;
 
-    [SerializeField]private bool USE_REG = true;
+    [SerializeField]
+    private bool USE_NORM = true;
+
+    [SerializeField] 
+    private int KEEP_EVERY = 3;
+
+    [SerializeField] private int SEQ_LEN = 45;
+    
+    private int frameCounter;
     
     private List<float> minVals = new List<float>()
     {
@@ -65,10 +73,9 @@ public class EyeLogger : MonoBehaviour
         -0.4183f,
         0.0f,
         0.0f,
-        -3419625.0f,
-        -2735984.0f,
-        -1.5f,
-        0.0f
+        0.0f,
+        0.0f,
+        -1.5f
     };
 
     private List<float> maxVals = new List<float>()
@@ -91,8 +98,7 @@ public class EyeLogger : MonoBehaviour
         9.0f, 
         2204.172f, 
         83815.45f, 
-        18.8792f, 
-        9.0f
+        18.8792f
     };
     
     private Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
@@ -120,6 +126,9 @@ public class EyeLogger : MonoBehaviour
     public int sequenceLength;
     public int inputLength;
     private float[,] loggedData;
+
+    private Queue<List<float>> loggedDataQueue;
+
     public bool dataIsReady;
     private int capturedFrames;
     
@@ -139,7 +148,10 @@ public class EyeLogger : MonoBehaviour
         capturedFrames = 0;
         dataIsReady = false;
         
-        loggedData = new float[sequenceLength, inputLength]; 
+        loggedData = new float[sequenceLength, inputLength];
+        loggedDataQueue = new Queue<List<float>>();
+        
+        
         logIndex = PlayerPrefs.GetInt("Index", 0);
         logIndex++;
         PlayerPrefs.SetInt("Index", logIndex);
@@ -197,7 +209,16 @@ public class EyeLogger : MonoBehaviour
     {
         UpdateValues();
         CaptureInferenceData();
+        if (frameCounter % KEEP_EVERY == 0)
+        {
+            CaptureInferenceDataQueue();
+        }
 
+        if (!dataIsReady && loggedDataQueue.Count >= SEQ_LEN)
+        {
+            dataIsReady = true;
+        }
+        
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (state == LoggerState.Inference)
@@ -214,6 +235,8 @@ public class EyeLogger : MonoBehaviour
         }
 
         currentFrame++;
+        
+        frameCounter++;
     }
 
     public void Log(Vector3 gazeVec, Vector3 gazePt, string gazeObj)
@@ -248,6 +271,47 @@ public class EyeLogger : MonoBehaviour
         leftHandRotation = leftHand.transform.rotation;
     }
 
+    private void AddFrameToQueue(List<float> frame)
+    {
+        loggedDataQueue.Enqueue(frame);
+    }
+
+    private void CaptureInferenceDataQueue()
+    {
+        loggedDataQueue.Dequeue();
+
+        Vector3 playerUp = player.transform.up;
+        Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
+        Vector3 rightHandUp = rightHand.transform.up;
+        Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
+        
+        List<float> newFrame = new List<float>()
+        {
+            Normalize(playerUp.x, minVals[0], maxVals[0]),
+            Normalize(playerUp.y, minVals[1], maxVals[1]),
+            Normalize(playerUp.z, minVals[2], maxVals[2]),
+            Normalize(rightHandPos.x, minVals[3], maxVals[3]),
+            Normalize(rightHandPos.y, minVals[4], maxVals[4]),
+            Normalize(rightHandPos.z, minVals[5], maxVals[5]),
+            Normalize(rightHandUp.x, minVals[6], maxVals[6]),
+            Normalize(rightHandUp.y, minVals[7], maxVals[7]),
+            Normalize(rightHandUp.z, minVals[8], maxVals[8]),
+            Normalize(gazeVector.x, minVals[9], maxVals[9]),
+            Normalize(gazeVector.y, minVals[10], maxVals[10]),
+            Normalize(gazeVector.z, minVals[11], maxVals[11]),
+            Normalize(gazePoint.x, minVals[12], maxVals[12]),
+            Normalize(gazePoint.y, minVals[13], maxVals[13]),
+            Normalize(gazePoint.z, minVals[14], maxVals[14]),
+            Normalize(TagToInt(gazeObjectTag), minVals[15], maxVals[15]),
+            Normalize(pixelPositionObject.x, minVals[16], maxVals[16]),
+            Normalize(pixelPositionObject.y, minVals[17], maxVals[17]),
+            Normalize(pixelPositionObject.z, minVals[18], maxVals[18])
+        };
+        loggedDataQueue.Enqueue(newFrame);
+
+    }
+    
+    
     private void CaptureInferenceData()
     {
         var loggedDataLastFrameIdx = loggedData.GetLength(0) - 1;
@@ -288,11 +352,11 @@ public class EyeLogger : MonoBehaviour
         loggedData[loggedDataLastFrameIdx, 17] = pixelPositionObject.y;
         loggedData[loggedDataLastFrameIdx, 18] = pixelPositionObject.z;
 
-        if (USE_REG)
+        if (USE_NORM)
         {
             for (int i = 0; i < 19; i++)
             {
-                loggedData[loggedDataLastFrameIdx, i] = Reg(loggedData[loggedDataLastFrameIdx, i], minVals[i], maxVals[i]);
+                loggedData[loggedDataLastFrameIdx, i] = Normalize(loggedData[loggedDataLastFrameIdx, i], minVals[i], maxVals[i]);
             }
         }
         
@@ -309,7 +373,7 @@ public class EyeLogger : MonoBehaviour
         }*/
     }
 
-    private float Reg(float val, float min, float max)
+    private float Normalize(float val, float min, float max)
     {
         return (val - min) / (max - min);
     }
@@ -469,4 +533,22 @@ public class EyeLogger : MonoBehaviour
     {
         return loggedData;
     }
+
+    public float[,] GetDataQueue()
+    {
+        var dataAsArray = new float[sequenceLength, inputLength];
+        int seqIndex = 0;
+        foreach (var li in loggedDataQueue)
+        {
+            for (int i = 0; i < inputLength; i++)
+            {
+                dataAsArray[seqIndex, i] = li[i];
+            }
+
+            seqIndex++;
+        }
+
+        return dataAsArray;
+    }
+    
 }
