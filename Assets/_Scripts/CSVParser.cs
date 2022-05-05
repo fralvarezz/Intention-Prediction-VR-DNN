@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using System.IO;
 using System.Linq;
@@ -73,6 +74,38 @@ public class CSVParser
 
         return parsedDataList;
     }
+
+    public static Queue<ReplayData> ReplayDataQueue(string filePath)
+    {
+        CultureInfo cultureInfo = new CultureInfo("da-DK");
+        var path = filePath;
+        Queue<ReplayData> replayDataQueue = new Queue<ReplayData>();
         
-    
+        StreamReader reader = new StreamReader(path);
+        string line;
+        string header = reader.ReadLine();
+        
+        while ((line = reader.ReadLine()) != null)
+        {
+            var csvLine = line.Split(';');
+
+            Vector3 playerHeadPosition = new Vector3(float.Parse(csvLine[2], cultureInfo), float.Parse(csvLine[3], cultureInfo), float.Parse(csvLine[4], cultureInfo));
+            Vector3 playerHeadUp = new Vector3(float.Parse(csvLine[5], cultureInfo), float.Parse(csvLine[6], cultureInfo), float.Parse(csvLine[7], cultureInfo));
+            Vector3 playerHeadForward = Vector3.forward; //TODO: Replace forward with data vector
+            
+            Vector3 relativeControllerPosition = new Vector3(float.Parse(csvLine[8], cultureInfo), float.Parse(csvLine[9], cultureInfo), float.Parse(csvLine[10], cultureInfo));
+            Vector3 relativeControllerUp = new Vector3(float.Parse(csvLine[8], cultureInfo), float.Parse(csvLine[9], cultureInfo), float.Parse(csvLine[10], cultureInfo));
+            Vector3 relativeControllerForward = Vector3.forward; //TODO: Replace forward with data vector
+            
+            Vector3 gazeVector = new Vector3(float.Parse(csvLine[11], cultureInfo), float.Parse(csvLine[12], cultureInfo), float.Parse(csvLine[13], cultureInfo));
+            int objectTag = int.Parse(csvLine[csvLine.Length - 1]);
+            
+            ReplayData replayData = new ReplayData(playerHeadPosition, playerHeadUp, playerHeadForward, relativeControllerPosition, relativeControllerUp, relativeControllerForward, gazeVector, objectTag);            
+            replayDataQueue.Enqueue(replayData);
+        }
+
+        return replayDataQueue;
+    }
+
+
 }
