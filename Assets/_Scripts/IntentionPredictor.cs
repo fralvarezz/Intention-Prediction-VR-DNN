@@ -105,6 +105,31 @@ public class IntentionPredictor : MonoBehaviour
         textMeshProUGUI.text = "Predicted:" + prediction.predictedValue.ToString();
     }
 
+    public void SendFrameNetwork()
+    {
+        var data = CSVParser.ParseCSV();
+
+        foreach (var output in data)
+        {
+            if (output.Count == 0)
+                continue;
+            foreach (var segment in output)
+            {
+                
+
+                for (int i = 0; i < segment.GetLength(0); i++)
+                {
+                    var frame = new float[segment.GetLength(1)];
+                    for (int j = 0; j < segment.GetLength(1); j++)
+                    {
+                        frame[j] = segment[i, j];
+                        Debug.Log(frame);
+                    }
+                }
+            }
+        }
+    }
+    
     public void PredictFromCSV()
     {
         runtimeModel = ModelLoader.Load(modelAsset);
