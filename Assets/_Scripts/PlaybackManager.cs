@@ -18,7 +18,7 @@ public class PlaybackManager : MonoBehaviour
 
     private void Awake()
     {
-        
+        Application.targetFrameRate = 90;
     }
 
     void Start()
@@ -58,10 +58,14 @@ public class PlaybackManager : MonoBehaviour
         }
         
         var data = replayQueue.Dequeue();
-        Debug.Log(data.playerHeadPosition);
-        Debug.Log(data.relativeControllerPosition);
+        Debug.Log(VecToStr(data.playerHeadPosition));
+        Debug.Log(VecToStr(data.relativeControllerPosition));
         playerHead.transform.position = data.playerHeadPosition;
-        controller.transform.localPosition = data.relativeControllerPosition;
+        playerHead.transform.up = data.playerHeadUp;
+        playerHead.transform.forward = data.playerHeadForward;
+        controller.transform.position = SetRelativePosition(playerHead.transform, data.relativeControllerPosition);
+        controller.transform.up = data.relativeControllerUp;
+        controller.transform.forward = data.relativeControllerForward;
         Debug.DrawRay(playerHead.transform.position, data.gazeVector.normalized * 10f, Color.red);
         for (int i = 0; i < items.Count; i++)
         {
@@ -70,6 +74,15 @@ public class PlaybackManager : MonoBehaviour
                 items[i].GetComponent<Renderer>().material.color = data.objectTag == i ? Color.red : Color.white;
             }
         }
-
+    }
+    
+    private string VecToStr(Vector3 vec)
+    {
+        return vec.x.ToString("N4") + ", " + vec.y.ToString("N4") + ", " + vec.z.ToString("N4");
+    }
+    
+    private Vector3 SetRelativePosition(Transform origin, Vector3 position)
+    {
+        return origin.position + position;
     }
 }

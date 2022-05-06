@@ -91,13 +91,13 @@ public class CSVParser
 
             Vector3 playerHeadPosition = new Vector3(float.Parse(csvLine[2], cultureInfo), float.Parse(csvLine[3], cultureInfo), float.Parse(csvLine[4], cultureInfo));
             Vector3 playerHeadUp = new Vector3(float.Parse(csvLine[5], cultureInfo), float.Parse(csvLine[6], cultureInfo), float.Parse(csvLine[7], cultureInfo));
-            Vector3 playerHeadForward = Vector3.forward; //TODO: Replace forward with data vector
+            Vector3 playerHeadForward = new Vector3(float.Parse(csvLine[8], cultureInfo), float.Parse(csvLine[9], cultureInfo), float.Parse(csvLine[10], cultureInfo));
             
-            Vector3 relativeControllerPosition = new Vector3(float.Parse(csvLine[8], cultureInfo), float.Parse(csvLine[9], cultureInfo), float.Parse(csvLine[10], cultureInfo));
-            Vector3 relativeControllerUp = new Vector3(float.Parse(csvLine[8], cultureInfo), float.Parse(csvLine[9], cultureInfo), float.Parse(csvLine[10], cultureInfo));
-            Vector3 relativeControllerForward = Vector3.forward; //TODO: Replace forward with data vector
+            Vector3 relativeControllerPosition = new Vector3(float.Parse(csvLine[11], cultureInfo), float.Parse(csvLine[12], cultureInfo), float.Parse(csvLine[13], cultureInfo));
+            Vector3 relativeControllerUp = new Vector3(float.Parse(csvLine[14], cultureInfo), float.Parse(csvLine[15], cultureInfo), float.Parse(csvLine[16], cultureInfo));
+            Vector3 relativeControllerForward = new Vector3(float.Parse(csvLine[17], cultureInfo), float.Parse(csvLine[18], cultureInfo), float.Parse(csvLine[19], cultureInfo));
             
-            Vector3 gazeVector = new Vector3(float.Parse(csvLine[11], cultureInfo), float.Parse(csvLine[12], cultureInfo), float.Parse(csvLine[13], cultureInfo));
+            Vector3 gazeVector = new Vector3(float.Parse(csvLine[20], cultureInfo), float.Parse(csvLine[21], cultureInfo), float.Parse(csvLine[22], cultureInfo));
             int objectTag = int.Parse(csvLine[csvLine.Length - 1]);
             
             ReplayData replayData = new ReplayData(playerHeadPosition, playerHeadUp, playerHeadForward, relativeControllerPosition, relativeControllerUp, relativeControllerForward, gazeVector, objectTag);            

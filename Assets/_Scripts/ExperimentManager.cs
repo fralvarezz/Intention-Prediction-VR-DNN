@@ -43,6 +43,9 @@ public class ExperimentManager : MonoBehaviour
         
         if(_anyItemHighlighted)
             return;
+        
+        if(loopCount < 0)
+            return;
 
         _timeUntilNextItem -= Time.deltaTime;
         if (_timeUntilNextItem <= 0)
@@ -57,7 +60,7 @@ public class ExperimentManager : MonoBehaviour
         itemsToHighlight[index].GetComponent<Renderer>().material.color = Color.red;
         itemsToHighlight[index].GetComponent<SelectableItem>().isSelected = true;
         _highlightedItemId = index;
-        EyeLogger.Instance.objectInteractedWith = itemsToHighlight[index].name;
+        EyeLogger.Instance.correctLabel = itemsToHighlight[index].name;
 
         _timeUntilNextItem = timeBetweenItems;
         _anyItemHighlighted = true;
@@ -67,13 +70,13 @@ public class ExperimentManager : MonoBehaviour
     {
         itemsToHighlight[_highlightedItemId].GetComponent<Renderer>().material.color = Color.white;
         itemsToHighlight.RemoveAt(_highlightedItemId);
-        EyeLogger.Instance.objectInteractedWith = "";
+        EyeLogger.Instance.correctLabel = "";
         _anyItemHighlighted = false;
         
         if(itemsToHighlight.Count == 0 && loopCount > 0)
         {
             itemsToHighlight = new List<GameObject>(items);
-            Debug.Log("Restarted the experiment, items to highlight count : " + itemsToHighlight.Count);
+            Debug.Log("Restarted the experiment");
             loopCount--;
         }
     }
