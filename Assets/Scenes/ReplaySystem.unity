@@ -688,7 +688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab97f3d11cfc92d4e8e3a0a47d431962, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playbackFileName: Assets/eyeLog_145.csv
+  playbackFileName: Assets/eyeLog_147.csv
   playerHead: {fileID: 1718910543}
   controller: {fileID: 1315636270}
   items:
@@ -3494,7 +3494,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1718910543}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
   m_Name: 
