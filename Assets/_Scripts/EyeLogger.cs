@@ -41,7 +41,7 @@ public class EyeLogger : MonoBehaviour
     private Vector3 gazePoint;
     private string gazeObjectTag = "";
 
-    public string objectInteractedWith = "";
+    public string correctLabel = "";
     
     private static EyeLogger _instance;
 
@@ -55,6 +55,7 @@ public class EyeLogger : MonoBehaviour
     
     private int frameCounter;
     
+    //TODO: Update minVals
     private List<float> minVals = new List<float>()
     {
         -0.8447f,
@@ -78,6 +79,7 @@ public class EyeLogger : MonoBehaviour
         -1.5f
     };
 
+    //TODO: Update maxVals
     private List<float> maxVals = new List<float>()
     {
         0.5001f, 
@@ -172,6 +174,10 @@ public class EyeLogger : MonoBehaviour
             "player_up_y" + DELIM +
             "player_up_z" + DELIM +
             
+            "player_fwd_x" + DELIM +
+            "player_fwd_y" + DELIM +
+            "player_fwd_z" + DELIM +
+            
             "rel_r_hand_x" + DELIM +
             "rel_r_hand_y" + DELIM +
             "rel_r_hand_z" + DELIM +
@@ -179,6 +185,10 @@ public class EyeLogger : MonoBehaviour
             "r_hand_up_x" + DELIM +
             "r_hand_up_y" + DELIM +
             "r_hand_up_z" + DELIM +
+            
+            "r_hand_fwd_x" + DELIM +
+            "r_hand_fwd_y" + DELIM +
+            "r_hand_fwd_z" + DELIM +
             
             "gaze_vec_x" + DELIM +
             "gaze_vec_y" + DELIM +
@@ -192,9 +202,8 @@ public class EyeLogger : MonoBehaviour
             
             "gaze_to_screen_x" + DELIM +
             "gaze_to_screen_y" + DELIM +
-            "gaze_to_screen_z" + DELIM +
             
-            "obj_interacted_with";
+            "correct_label";
         
         writer.WriteLine(csvHeader);
         
@@ -245,15 +254,13 @@ public class EyeLogger : MonoBehaviour
         gazePoint = gazePt;
         gazeObjectTag = gazeObj;
         
-        //Debug.Log("Logged gaze object is: " + gazeObj);
-        
         if(state != LoggerState.Logging)
             return;
 
         writer.WriteLine(GetLogAsString());
         
         if(ExperimentManager.instance == null || !ExperimentManager.instance.isGuided)
-            objectInteractedWith = "";
+            correctLabel = "";
 
     }
 
@@ -278,11 +285,16 @@ public class EyeLogger : MonoBehaviour
 
     private void CaptureInferenceDataQueue()
     {
+        if(state != LoggerState.Inference)
+            return;
+        
         loggedDataQueue.Dequeue();
 
         Vector3 playerUp = player.transform.up;
+        Vector3 playerForward = player.transform.forward;
         Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
         Vector3 rightHandUp = rightHand.transform.up;
+        Vector3 rightHandForward = rightHand.transform.forward;
         Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
         
         List<float> newFrame = new List<float>()
@@ -314,6 +326,9 @@ public class EyeLogger : MonoBehaviour
     
     private void CaptureInferenceData()
     {
+        if(state != LoggerState.Inference)
+            return;
+        
         var loggedDataLastFrameIdx = loggedData.GetLength(0) - 1;
         
         //first shift the array one to the left
@@ -384,20 +399,19 @@ public class EyeLogger : MonoBehaviour
     
     private Vector3 GetRelativePosition(Transform origin, Vector3 position)
     {
-        Vector3 distance = position - origin.position;
-        Vector3 relativePosition = Vector3.zero;
-        relativePosition.x = Vector3.Dot(distance, origin.right.normalized);
-        relativePosition.y = Vector3.Dot(distance, origin.up.normalized);
-        relativePosition.z = Vector3.Dot(distance, origin.forward.normalized);
-
-        return relativePosition;
+        return position - origin.position;
     }
 
     private string VecToStr(Vector3 vec)
     {
         return vec.x.ToString("N4") + DELIM + vec.y.ToString("N4") + DELIM + vec.z.ToString("N4") + DELIM;
     }
-    
+
+    private string Vec2ToStr(Vector3 vec)
+    {
+        return vec.x.ToString("N4") + DELIM + vec.y.ToString("N4") + DELIM;
+    }
+
     private static bool RELATIVE_POS = true;
     private static string DELIM = ";";
     
@@ -408,23 +422,21 @@ public class EyeLogger : MonoBehaviour
         output += currentFrame + DELIM + time + " " + time.Millisecond + DELIM;
         output += VecToStr(playerPosition);
         output += VecToStr(player.transform.up);
+        output += VecToStr(player.transform.forward);
         
         //We focus only on right hand maybe?
         if (RELATIVE_POS)
-        {
             output += VecToStr(GetRelativePosition(player.transform, rightHandPosition));
-        }
         else
-        {
             output += VecToStr(rightHandPosition);
-        }
-
+        
         output += VecToStr(rightHand.transform.up);
+        output += VecToStr(rightHand.transform.forward);
         
         //TODO: Figure out if rightHandRotation needs to be relative or not
         output += VecToStr(gazeVector) + VecToStr(gazePoint) + TagToInt(gazeObjectTag) + DELIM;
-        output += VecToStr(Camera.main.WorldToScreenPoint(gazePoint));
-        output += TagToInt(objectInteractedWith); // save when a player interacts with an object, not fed to the NN
+        output += Vec2ToStr(Camera.main.WorldToViewportPoint(gazePoint));
+        output += TagToInt(correctLabel); // save when a player interacts with an object, not fed to the NN
         
         return output;
 
@@ -435,26 +447,6 @@ public class EyeLogger : MonoBehaviour
 #if UNITY_EDITOR
         return Application.dataPath + $"/eyeLog_{logIndex}.csv";
 #endif
-    }
-    
-    /// <summary>
-    /// Calculates screen-space position a world space object. Useful for showing something on screen that is not visible in VR.
-    /// For example, it can be used to update the position of a marker that highlights the gaze of the player, using eye tracking.
-    /// </summary>
-    /// <param name="camera">The camera used for VR rendering.</param>
-    /// <param name="worldPos">World position of a point.</param>
-    /// <returns>Screen position of a point.</returns>
-    static Vector2 WorldToScreenVR(Camera camera, Vector3 worldPos)
-    {
-        Vector3 screenPoint = camera.WorldToViewportPoint(worldPos);
-        float w = XRSettings.eyeTextureWidth;
-        float h = XRSettings.eyeTextureHeight;
-        float ar = w / h;
-
-        screenPoint.x = (screenPoint.x - 0.15f * XRSettings.eyeTextureWidth) / 0.7f;
-        screenPoint.y = (screenPoint.y - 0.15f * XRSettings.eyeTextureHeight) / 0.7f;
-
-        return screenPoint;
     }
 
     private int TagToInt(string objectTag)
@@ -471,7 +463,7 @@ public class EyeLogger : MonoBehaviour
     public void SetInteractedObject(string objectTag)
     {
         Debug.Log("Setting interacted object: " + objectTag);
-        objectInteractedWith = objectTag;
+        correctLabel = objectTag;
     }
 
     // this worked for one frame, not for batches
