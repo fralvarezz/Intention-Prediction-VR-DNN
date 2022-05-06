@@ -58,15 +58,13 @@ public class PlaybackManager : MonoBehaviour
         }
         
         var data = replayQueue.Dequeue();
-        Debug.Log(VecToStr(data.playerHeadPosition));
-        Debug.Log(VecToStr(data.relativeControllerPosition));
         playerHead.transform.position = data.playerHeadPosition;
         playerHead.transform.up = data.playerHeadUp;
         playerHead.transform.forward = data.playerHeadForward;
         controller.transform.position = SetRelativePosition(playerHead.transform, data.relativeControllerPosition);
         controller.transform.up = data.relativeControllerUp;
         controller.transform.forward = data.relativeControllerForward;
-        Debug.DrawRay(playerHead.transform.position, data.gazeVector.normalized * 10f, Color.red);
+        Debug.DrawRay(playerHead.transform.position, playerHead.transform.TransformDirection(data.gazeVector.normalized * 10f), Color.red);
         for (int i = 0; i < items.Count; i++)
         {
             if (items[i] != null)
