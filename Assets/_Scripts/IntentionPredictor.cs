@@ -138,7 +138,7 @@ public class IntentionPredictor : MonoBehaviour
         // Instantiate the prediction struct.
         prediction = new Prediction();
         
-        var data = CSVParser.ParseCSV();
+        var data = CSVParser.ParseCSV(3, false);
 
         int numCorrect = 0;
         int numTotal = 0;
@@ -165,7 +165,7 @@ public class IntentionPredictor : MonoBehaviour
 
                     Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
                     prediction.SetPrediction(outputTensor);
-                    Debug.Log("Predicted " + prediction.predictedValue + ". Actual: " + segment[endingFrame, segment.GetLength(1) - 1]);
+                    //Debug.Log("Predicted " + prediction.predictedValue + ". Actual: " + segment[endingFrame, segment.GetLength(1) - 1]);
                     if(prediction.predictedValue == (int)segment[endingFrame, segment.GetLength(1) - 1])
                     {
                         numCorrect++;
