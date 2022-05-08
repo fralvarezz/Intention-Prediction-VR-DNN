@@ -56,7 +56,7 @@ public class EyeLogger : MonoBehaviour
     private int frameCounter;
     
     //TODO: Update minVals
-    private List<float> minVals = new List<float>()
+    public List<float> minVals = new List<float>()
     {
         -0.8447f,
         0.3382f,
@@ -80,7 +80,7 @@ public class EyeLogger : MonoBehaviour
     };
 
     //TODO: Update maxVals
-    private List<float> maxVals = new List<float>()
+    public List<float> maxVals = new List<float>()
     {
         0.5001f, 
         1.0f, 
@@ -103,7 +103,7 @@ public class EyeLogger : MonoBehaviour
         18.8792f
     };
     
-    private Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
+    public Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
     {
         {"None", 0},
         {"WallShelf", 0},
@@ -391,7 +391,7 @@ public class EyeLogger : MonoBehaviour
         }*/
     }
 
-    private float Normalize(float val, float min, float max)
+    public float Normalize(float val, float min, float max)
     {
         return (val - min) / (max - min);
     }

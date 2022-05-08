@@ -7,28 +7,101 @@ using System.Linq;
 
 public class CSVParser
 {
-    static string path = "Assets/CSVs/NewData/fer_data.csv";
+    static string path = "Assets/CSVs/NewData/jonas_data.csv";
     
-    public static List<List<float[,]>> ParseCSV()
+    public static List<float> minVals = new List<float>()
     {
+        -0.8447f,
+        0.3382f,
+        -0.3764f,
+        -2.92f,
+        -1.3614f,
+        -0.358f,
+        -0.9971f,
+        -0.6687f,
+        -0.9999f,
+        -1.0f,
+        -1.0f,
+        -1.0f,
+        -5.15f,
+        -0.4183f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        -1.5f
+    };
+
+    //TODO: Update maxVals
+    public static List<float> maxVals = new List<float>()
+    {
+        0.5001f, 
+        1.0f, 
+        0.6271f, 
+        0.4839f, 
+        0.3688f, 
+        1.23f, 
+        0.7585f, 
+        1.0f, 
+        0.2298f,
+        0.5054f, 
+        0.423f, 
+        1.0f,
+        0.0f, 
+        1.7237f,
+        20.0f, 
+        9.0f, 
+        2204.172f, 
+        83815.45f, 
+        18.8792f
+    };
+    
+    public static float Normalize(float val, float min, float max)
+    {
+        var newVal = (val - min) / (max - min);
+        //Debug.Log("Converted " + val + " to " + newVal);
+        return newVal;
+    }
+    
+    public static List<List<float[,]>> ParseCSV(int keepEvery = 1, bool normalize = false)
+    {
+        CultureInfo.CurrentCulture = new CultureInfo("da-DK");
         List<float[]> parsedData = new List<float[]>();
         StreamReader reader = new StreamReader(path);
         string line;
         string header = reader.ReadLine();
+        int frameCount = 0;
+        
         while ((line = reader.ReadLine()) != null)
         {
+            if (frameCount % keepEvery != 0)
+            {
+                frameCount++;
+                continue;
+            }
             var csvLine = line.Split(';');
+            
             csvLine = new []
             {
                 csvLine[5], csvLine[6], csvLine[7], csvLine[8], csvLine[9], csvLine[10], csvLine[11], csvLine[12],
                 csvLine[13], csvLine[14], csvLine[15], csvLine[16], csvLine[17], csvLine[18], csvLine[19], csvLine[20],
                 csvLine[21], csvLine[22], csvLine[23], csvLine[24]
             };
+
             if(csvLine[csvLine.Length - 1] != "0")
             {
-                csvLine = csvLine.Select(s => s.Replace(".", "").Replace(",", ".")).ToArray();
-                parsedData.Add(csvLine.Select(s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat)).ToArray());
+                //csvLine = csvLine.Select(s => s.Replace(".", "").Replace(",", ".")).ToArray();
+                //parsedData.Add(csvLine.Select(s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat)).ToArray());
+                parsedData.Add(csvLine.Select(float.Parse).ToArray());
+                if (normalize)
+                {
+                    for (int i = 0; i < 19; i++)
+                    {
+                        parsedData[parsedData.Count - 1][i] = Normalize(parsedData[parsedData.Count - 1][i], minVals[i], maxVals[i]);
+                    }
+                }
             }
+            frameCount++;
         }
 
         List<List<float[,]>> parsedDataList = new List<List<float[,]>>()
