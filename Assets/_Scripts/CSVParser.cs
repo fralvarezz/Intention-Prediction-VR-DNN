@@ -26,7 +26,8 @@ public class CSVParser
             };
             if(csvLine[csvLine.Length - 1] != "0")
             {
-                parsedData.Add(csvLine.Select(float.Parse).ToArray());
+                csvLine = csvLine.Select(s => s.Replace(".", "").Replace(",", ".")).ToArray();
+                parsedData.Add(csvLine.Select(s => float.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture.NumberFormat)).ToArray());
             }
         }
 
