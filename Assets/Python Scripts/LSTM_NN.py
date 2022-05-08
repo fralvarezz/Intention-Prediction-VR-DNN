@@ -24,13 +24,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Hyper-parameters
 # num_classes = num of items
 num_classes = 10  # 9 items and None
-num_srans = 100
 batch_size = 1
 learning_rate = 0.0001
 num_epochs = 10
 
-input_size = 19  # num of inputs per frame
-sequence_length = 30  # num of frames in a sequence
+input_size = 24  # num of inputs per frame
+sequence_length = 45  # num of frames in a sequence
 hidden_size = 128
 num_layers = 2
 
@@ -66,8 +65,11 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
-up.normalize()
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/CORRECT_DATA/finaldata2.csv", "../CSVs/CORRECT_DATA/finaldata3.csv",
+                                   "../CSVs/CORRECT_DATA/finaldata4.csv", "../CSVs/CORRECT_DATA/finaldata5.csv",
+                                   "../CSVS/CORRECT_DATA/finaldata7.csv", "../CSVs/CORRECT_DATA/finaldata8.csv",
+                                  "../CSVs/CORRECT_DATA/fer_data.csv")
+#up.normalize()
 segments = up.split_data_into_segments()
 segments = up.create_buckets_from_split(segments)
 up.split_data_2(segments, .2, .1)

@@ -72,8 +72,7 @@ public class IntentionPredictor : MonoBehaviour
         //print(input.GetLength(1));
         
         // TODO: I find unlikely that this worked first try
-        Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
-
+        Tensor inputTensor = new Tensor(new TensorShape(1,1,24,45), input);
         
         
         Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
@@ -138,7 +137,7 @@ public class IntentionPredictor : MonoBehaviour
         // Instantiate the prediction struct.
         prediction = new Prediction();
         
-        var data = CSVParser.ParseCSV(3, false);
+        var data = CSVParser.ParseCSV(1, false);
 
         int numCorrect = 0;
         int numTotal = 0;
@@ -161,7 +160,7 @@ public class IntentionPredictor : MonoBehaviour
                             input[j - startingFrame, k] = segment[j, k];
                         }
                     }
-                    Tensor inputTensor = new Tensor(new TensorShape(1,1,19,45), input);
+                    Tensor inputTensor = new Tensor(new TensorShape(1,1,24,45), input);
 
                     Tensor outputTensor = worker.Execute(inputTensor).PeekOutput();
                     prediction.SetPrediction(outputTensor);

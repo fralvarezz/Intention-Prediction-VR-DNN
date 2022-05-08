@@ -7,7 +7,7 @@ using System.Linq;
 
 public class CSVParser
 {
-    static string path = "Assets/CSVs/NewData/jonas_data.csv";
+    static string path = "Assets/CSVs/CORRECT_DATA/fer_data.csv";
     
     public static List<float> minVals = new List<float>()
     {
@@ -85,7 +85,8 @@ public class CSVParser
             {
                 csvLine[5], csvLine[6], csvLine[7], csvLine[8], csvLine[9], csvLine[10], csvLine[11], csvLine[12],
                 csvLine[13], csvLine[14], csvLine[15], csvLine[16], csvLine[17], csvLine[18], csvLine[19], csvLine[20],
-                csvLine[21], csvLine[22], csvLine[23], csvLine[24]
+                csvLine[21], csvLine[22], csvLine[23], csvLine[24], csvLine[25], csvLine[26], csvLine[27], csvLine[28],
+                csvLine[29]
             };
 
             if(csvLine[csvLine.Length - 1] != "0")
@@ -95,7 +96,7 @@ public class CSVParser
                 parsedData.Add(csvLine.Select(float.Parse).ToArray());
                 if (normalize)
                 {
-                    for (int i = 0; i < 19; i++)
+                    for (int i = 0; i < 24; i++)
                     {
                         parsedData[parsedData.Count - 1][i] = Normalize(parsedData[parsedData.Count - 1][i], minVals[i], maxVals[i]);
                     }
