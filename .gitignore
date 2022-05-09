@@ -74,3 +74,11 @@ crashlytics-build.properties
 
 eyeLog_*.csv
 eyeLog_*.csv.meta
+
+
+# Preprocessed data and model
+*.npz
+*.pt
+/[Pp]ython/tensorboard/
+/[Pp]ython/venv/
+/[Pp]ython/__pycache__/
