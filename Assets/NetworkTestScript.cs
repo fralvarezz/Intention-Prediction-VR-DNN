@@ -174,15 +174,10 @@ public class NetworkTestScript : MonoBehaviour
                     
                     for (int j = 0; j < segment.GetLength(1); j++)
                     {
-                        if (j < segment.GetLength(1) - 1)
-                        {
-                            frame[j] = Normalize(segment[i, j], minVals[j], maxVals[j]);
-                        }
-                        else
-                        {
-                            frame[j] = segment[i, j];
-                        }
+                       
+                        frame[j] = segment[i, j];
                     }
+                    Debug.Log("Sending packet with size: " + frame.Length);
                     socketInterface.SendFrame(frame);
                     yield return new WaitForSeconds(0.033f);
                     cnt++;

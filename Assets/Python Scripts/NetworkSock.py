@@ -20,7 +20,7 @@ def handle(data):
 def testing():
     ort_sess = ort.InferenceSession('../NN_Models/seventy_percent.onnx')
     sequence_length = 45  # num of frames in a sequence
-    input_size = 19  # num of inputs per frame
+    input_size = 24  # num of inputs per frame
     batch_size = 1
     # Test the model
     # In test phase, we don't need to compute gradients (for memory efficiency)
@@ -84,10 +84,10 @@ class NetworkRunner:
         self.sock.bind((self.HOST, self.PORT))
         self.sock.listen()
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.ort_sess = ort.InferenceSession("../NN_Models/seventy_percent.onnx")
+        self.ort_sess = ort.InferenceSession("../NN_Models/modelSun May  8 18,56,56 2022.onnx")
         self.frames = []
         self.sequence_length = 45
-        self.input_size = 19
+        self.input_size = 24
         self.batch_size = 1
         self.connected = False
 
@@ -109,6 +109,8 @@ class NetworkRunner:
         formatted_data = array.array('f')
         formatted_data.frombytes(frame)
         self.frames.append(formatted_data.tolist())
+        print("Received ")
+        print(formatted_data.tolist())
 
     def start_serving(self, first_time=False):
         if first_time:
@@ -123,7 +125,7 @@ class NetworkRunner:
             while self.connected:
                 try:
                     print("Waiting for data")
-                    data = conn.recv(80)
+                    data = conn.recv(100)
                     if not data:
                         self.connected = False
                         print("Client disconnected")
