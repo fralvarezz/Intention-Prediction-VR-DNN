@@ -18,7 +18,7 @@ def handle(data):
 
 
 def testing():
-    ort_sess = ort.InferenceSession('../NN_Models/seventy_percent.onnx')
+    ort_sess = ort.InferenceSession('../NN_Models/may10model.onnx')
     sequence_length = 45  # num of frames in a sequence
     input_size = 24  # num of inputs per frame
     batch_size = 1
@@ -84,7 +84,7 @@ class NetworkRunner:
         self.sock.bind((self.HOST, self.PORT))
         self.sock.listen()
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.ort_sess = ort.InferenceSession("../NN_Models/modelSun May  8 18,56,56 2022.onnx")
+        self.ort_sess = ort.InferenceSession("../NN_Models/may10model.onnx")
         self.frames = []
         self.sequence_length = 45
         self.input_size = 24
@@ -98,7 +98,7 @@ class NetworkRunner:
         if len(self.frames) < self.sequence_length:
             return None
         testing_data_no_labels = np.array(self.frames, dtype=np.float32)
-        testing_data_no_labels = testing_data_no_labels[:, :-1]
+        # testing_data_no_labels = testing_data_no_labels[:, :-1]
         testing_data_no_labels = testing_data_no_labels.reshape(self.batch_size, self.sequence_length, self.input_size)
         outputs = self.ort_sess.run(None, {'input': testing_data_no_labels})
         predicted = outputs[0].argmax(axis=1)[0]
@@ -125,7 +125,7 @@ class NetworkRunner:
             while self.connected:
                 try:
                     print("Waiting for data")
-                    data = conn.recv(100)
+                    data = conn.recv(96)
                     if not data:
                         self.connected = False
                         print("Client disconnected")

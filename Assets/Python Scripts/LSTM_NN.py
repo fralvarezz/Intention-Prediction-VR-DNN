@@ -26,7 +26,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 num_classes = 10  # 9 items and None
 batch_size = 1
 learning_rate = 0.0001
-num_epochs = 10
+num_epochs = 5
 
 input_size = 24  # num of inputs per frame
 sequence_length = 45  # num of frames in a sequence

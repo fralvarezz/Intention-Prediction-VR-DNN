@@ -52,57 +52,7 @@ public class EyeLogger : MonoBehaviour
     private int KEEP_EVERY = 3;
 
     [SerializeField] private int SEQ_LEN = 45;
-    
-    private int frameCounter;
-    
-    //TODO: Update minVals
-    public List<float> minVals = new List<float>()
-    {
-        -0.8447f,
-        0.3382f,
-        -0.3764f,
-        -2.92f,
-        -1.3614f,
-        -0.358f,
-        -0.9971f,
-        -0.6687f,
-        -0.9999f,
-        -1.0f,
-        -1.0f,
-        -1.0f,
-        -5.15f,
-        -0.4183f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f,
-        -1.5f
-    };
 
-    //TODO: Update maxVals
-    public List<float> maxVals = new List<float>()
-    {
-        0.5001f, 
-        1.0f, 
-        0.6271f, 
-        0.4839f, 
-        0.3688f, 
-        1.23f, 
-        0.7585f, 
-        1.0f, 
-        0.2298f,
-        0.5054f, 
-        0.423f, 
-        1.0f,
-        0.0f, 
-        1.7237f,
-        20.0f, 
-        9.0f, 
-        2204.172f, 
-        83815.45f, 
-        18.8792f
-    };
-    
     public Dictionary<String, int> nameToIntDict = new Dictionary<string, int>()
     {
         {"None", 0},
@@ -127,9 +77,7 @@ public class EyeLogger : MonoBehaviour
 
     public int sequenceLength;
     public int inputLength;
-    private float[,] loggedData;
-
-    private Queue<List<float>> loggedDataQueue;
+    private float[] frame;
 
     public bool dataIsReady;
     private int capturedFrames;
@@ -149,10 +97,7 @@ public class EyeLogger : MonoBehaviour
         //state = LoggerState.Inference;
         capturedFrames = 0;
         dataIsReady = false;
-        
-        loggedData = new float[sequenceLength, inputLength];
-        loggedDataQueue = new Queue<List<float>>();
-        
+        frame = new float[inputLength];
         
         logIndex = PlayerPrefs.GetInt("Index", 0);
         logIndex++;
@@ -205,7 +150,8 @@ public class EyeLogger : MonoBehaviour
             
             "correct_label";
         
-        writer.WriteLine(csvHeader);
+        if(state == LoggerState.Logging)
+            writer.WriteLine(csvHeader);
         
     }
     
@@ -218,15 +164,11 @@ public class EyeLogger : MonoBehaviour
     {
         UpdateValues();
         CaptureInferenceData();
-        if (frameCounter % KEEP_EVERY == 0)
-        {
-            CaptureInferenceDataQueue();
-        }
 
-        if (!dataIsReady && loggedDataQueue.Count >= SEQ_LEN)
+        /*if (!dataIsReady && loggedDataQueue.Count >= SEQ_LEN)
         {
             dataIsReady = true;
-        }
+        }*/
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -244,8 +186,6 @@ public class EyeLogger : MonoBehaviour
         }
 
         currentFrame++;
-        
-        frameCounter++;
     }
 
     public void Log(Vector3 gazeVec, Vector3 gazePt, string gazeObj)
@@ -278,12 +218,12 @@ public class EyeLogger : MonoBehaviour
         leftHandRotation = leftHand.transform.rotation;
     }
 
-    private void AddFrameToQueue(List<float> frame)
+    /*private void AddFrameToQueue(List<float> frame)
     {
         loggedDataQueue.Enqueue(frame);
-    }
+    }*/
 
-    private void CaptureInferenceDataQueue()
+    /*private void CaptureInferenceDataQueue()
     {
         if(state != LoggerState.Inference)
             return;
@@ -321,74 +261,50 @@ public class EyeLogger : MonoBehaviour
         };
         loggedDataQueue.Enqueue(newFrame);
 
-    }
+    }*/
     
     
     private void CaptureInferenceData()
     {
         if(state != LoggerState.Inference)
             return;
-        
-        var loggedDataLastFrameIdx = loggedData.GetLength(0) - 1;
-        
-        //first shift the array one to the left
-        for (int i = loggedDataLastFrameIdx; i >= 1; i--)
-        {
-            for (int j = 0; j < loggedData.GetLength(1) - 1; j++)
-            {
-                loggedData[i - 1, j] = loggedData[i, j];
-            }
-        }
 
         Vector3 playerUp = player.transform.up;
+        Vector3 playerForward = player.transform.forward;
         Vector3 rightHandPos = RELATIVE_POS ? GetRelativePosition(player.transform, rightHandPosition) : rightHandPosition;
         Vector3 rightHandUp = rightHand.transform.up;
-        Vector3 pixelPositionObject = Camera.main.WorldToScreenPoint(gazePoint);
+        Vector3 rightHandForward = rightHand.transform.forward;
         Vector3 viewPortPositionObject = Camera.main.WorldToViewportPoint(gazePoint);
-        //Debug.Log("Pixel position of object: " + pixelPositionObject);
-        //Debug.Log("Viewport position of object: " + viewPortPositionObject);
 
-        //Add last frame to the end of the array
-        //Didn't find a more performant way to do it
-        loggedData[loggedDataLastFrameIdx, 0] = playerUp.x;
-        loggedData[loggedDataLastFrameIdx, 1] = playerUp.y;
-        loggedData[loggedDataLastFrameIdx, 2] = playerUp.z;
-        loggedData[loggedDataLastFrameIdx, 3] = rightHandPos.x;
-        loggedData[loggedDataLastFrameIdx, 4] = rightHandPos.y;
-        loggedData[loggedDataLastFrameIdx, 5] = rightHandPos.z;
-        loggedData[loggedDataLastFrameIdx, 6] = rightHandUp.x;
-        loggedData[loggedDataLastFrameIdx, 7] = rightHandUp.y;
-        loggedData[loggedDataLastFrameIdx, 8] = rightHandUp.z;
-        loggedData[loggedDataLastFrameIdx, 9] = gazeVector.x;
-        loggedData[loggedDataLastFrameIdx, 10] = gazeVector.y;
-        loggedData[loggedDataLastFrameIdx, 11] = gazeVector.z;
-        loggedData[loggedDataLastFrameIdx, 12] = gazePoint.x;
-        loggedData[loggedDataLastFrameIdx, 13] = gazePoint.y;
-        loggedData[loggedDataLastFrameIdx, 14] = gazePoint.z;
-        loggedData[loggedDataLastFrameIdx, 15] = TagToInt(gazeObjectTag);
-        loggedData[loggedDataLastFrameIdx, 16] = pixelPositionObject.x;
-        loggedData[loggedDataLastFrameIdx, 17] = pixelPositionObject.y;
-        loggedData[loggedDataLastFrameIdx, 18] = pixelPositionObject.z;
+        float[] newFrame = new[]
+        {
+            playerUp.x,
+            playerUp.y,
+            playerUp.z,
+            playerForward.x,
+            playerForward.y,
+            playerForward.z,
+            rightHandPos.x,
+            rightHandPos.y,
+            rightHandPos.z,
+            rightHandUp.x,
+            rightHandUp.y,
+            rightHandUp.z,
+            rightHandForward.x,
+            rightHandForward.y,
+            rightHandForward.z,
+            gazeVector.x,
+            gazeVector.y,
+            gazeVector.z,
+            gazePoint.x,
+            gazePoint.y,
+            gazePoint.z,
+            TagToInt(gazeObjectTag),
+            viewPortPositionObject.x,
+            viewPortPositionObject.y
+        };
 
-        if (USE_NORM)
-        {
-            for (int i = 0; i < 19; i++)
-            {
-                loggedData[loggedDataLastFrameIdx, i] = Normalize(loggedData[loggedDataLastFrameIdx, i], minVals[i], maxVals[i]);
-            }
-        }
-        
-        // check if data is ready to be collected
-        /*capturedFrames++;
-        if (capturedFrames == sequenceLength)
-        {
-            dataIsReady = true;
-            capturedFrames = 0;
-        }
-        else
-        {
-            dataIsReady = false;
-        }*/
+        frame = newFrame;
     }
 
     public float Normalize(float val, float min, float max)
@@ -526,10 +442,15 @@ public class EyeLogger : MonoBehaviour
 
     public float[,] GetData()
     {
-        return loggedData;
+        return new float[1,1];
     }
 
-    public float[,] GetDataQueue()
+    public float[] GetFrame()
+    {
+        return frame;
+    }
+
+    /*public float[,] GetDataQueue()
     {
         var dataAsArray = new float[sequenceLength, inputLength];
         int seqIndex = 0;
@@ -544,6 +465,7 @@ public class EyeLogger : MonoBehaviour
         }
 
         return dataAsArray;
-    }
+    }*/
+    
     
 }
