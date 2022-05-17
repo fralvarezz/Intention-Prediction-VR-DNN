@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 178246bd68535724798586da734dbcfc
-timeCreated: 1575344792
+guid: 1e23428cc37b9714693f9e5ee9637deb
+timeCreated: 1574894000
 licenseType: Store
 ModelImporter:
   serializedVersion: 21
@@ -9,7 +9,8 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: SM_Prop_Headphones_01
+    4300000: SM_Bld_Wall_Trim_01
+    9500000: //RootNode
   materials:
     importMaterials: 0
     materialName: 0
