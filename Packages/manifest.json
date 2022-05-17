@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.htc.upm.vivehandtracking": "1.0.0",
     "com.unity.barracuda": "3.0.0",
     "com.unity.collab-proxy": "1.11.2",
     "com.unity.ide.rider": "2.0.7",

@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "com.htc.upm.vivehandtracking": {
-      "version": "1.0.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://npm-registry.vive.com"
-    },
     "com.unity.barracuda": {
       "version": "3.0.0",
       "depth": 0,
