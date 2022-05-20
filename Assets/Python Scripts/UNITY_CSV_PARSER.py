@@ -21,6 +21,8 @@ class UnityParser:
         self.training_data = []
         self.testing_data = []
         self.validation_data = []
+        self.seq_len = 45
+
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
@@ -108,6 +110,28 @@ class UnityParser:
                     cur_class = data_class
                 seg.append(r)
         return seg_list
+
+    def split_data_into_segments_keep_earlier(self):
+        seg_list = []
+        cur_class = 0
+        for f in self.data:
+            seg = []
+            n = len(f)
+            for i in range(0, n):
+                data_class = int(f[i][-1])
+                if data_class != cur_class:
+                    if len(seg) > 0:
+                        if cur_class != 0:
+                            if i > self.seq_len:
+                                seg = [*f[i-self.seq_len:i], *seg]
+                            else:
+                                seg = [*f[:i], *seg]
+                            seg_list.append(np.array(seg, dtype=np.float32))
+                        seg = []
+                    cur_class = data_class
+                seg.append(f[i])
+        return seg_list
+
 
     def create_buckets_from_split(self, splitted):
         sub_lists = [[] for x in range(10)]
