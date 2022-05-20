@@ -65,10 +65,10 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/CORRECT_DATA/finaldata2.csv", "../CSVs/CORRECT_DATA/finaldata3.csv",
-                                   "../CSVs/CORRECT_DATA/finaldata4.csv", "../CSVs/CORRECT_DATA/finaldata5.csv",
-                                   "../CSVS/CORRECT_DATA/finaldata7.csv", "../CSVs/CORRECT_DATA/finaldata8.csv",
-                                  "../CSVs/CORRECT_DATA/fer_data.csv")
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/Training_Data/finaldata2.csv", "../CSVs/Training_Data/finaldata3.csv",
+                                   "../CSVs/Training_Data/finaldata4.csv", "../CSVs/Training_Data/finaldata5.csv",
+                                   "../CSVS/Training_Data/finaldata7.csv", "../CSVs/Training_Data/finaldata8.csv",
+                                  "../CSVs/Training_Data/fer_data.csv")
 #up.normalize()
 segments = up.split_data_into_segments()
 segments = up.create_buckets_from_split(segments)
