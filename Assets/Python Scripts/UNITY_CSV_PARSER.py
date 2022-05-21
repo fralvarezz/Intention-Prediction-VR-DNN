@@ -114,22 +114,22 @@ class UnityParser:
     def split_data_into_segments_keep_earlier(self):
         seg_list = []
         cur_class = 0
+        first_idx = 0
         for f in self.data:
             seg = []
-            n = len(f)
-            for i in range(0, n):
-                data_class = int(f[i][-1])
+            f_len = len(f)
+            for i in range(0, f_len):
+                r = f[i]
+                data_class = int(r[-1])
                 if data_class != cur_class:
                     if len(seg) > 0:
                         if cur_class != 0:
-                            if i > self.seq_len:
-                                seg = [*f[i-self.seq_len:i], *seg]
-                            else:
-                                seg = [*f[:i], *seg]
+                            seg = f[first_idx:i]
                             seg_list.append(np.array(seg, dtype=np.float32))
                         seg = []
+                        first_idx = max(0, i - self.seq_len)
                     cur_class = data_class
-                seg.append(f[i])
+                seg.append(r)
         return seg_list
 
 
