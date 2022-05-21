@@ -283,6 +283,7 @@ class UnityParser:
             self.training_data.append(training_set)
             self.validation_data.append(validation_set)
             self.testing_data.append(testing_set)
+            self.data = splitted_data
         print("splitted data")
 
     def split_data(self, use_training=None, use_validation=None):

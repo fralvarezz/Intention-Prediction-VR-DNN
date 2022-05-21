@@ -3,18 +3,14 @@ import onnx
 import onnxruntime as ort
 import numpy as np
 import UNITY_CSV_PARSER
-from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
 
-
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/Training_Data/finaldata2.csv", "../CSVs/Training_Data/finaldata3.csv",
-                                  "../CSVs/Training_Data/finaldata4.csv", "../CSVs/Training_Data/finaldata5.csv",
-                                  "../CSVS/Training_Data/finaldata7.csv", "../CSVs/Training_Data/finaldata8.csv",
-                                  "../CSVs/Training_Data/fer_data.csv",  keep_every=1)
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/testing_data1.csv", "../CSVs/testing_data2.csv", "../CSVs/testing_data3.csv",
+                                  "../CSVs/testing_data4.csv", keep_every=1)
 # up.normalize()
 segments = up.split_data_into_segments_keep_earlier()
 segments = up.create_buckets_from_split(segments)
-up.split_data_2(segments, .2, .1)
-
+up.split_data_2(segments, 0.2, 0.1)
 
 ort_sess = ort.InferenceSession('../NN_Models/may10model.onnx')
 
@@ -26,11 +22,6 @@ class_preds = [[] for i in range(10)]
 
 
 def testing():
-    # Test the model
-    # In test phase, we don't need to compute gradients (for memory efficiency)
-
-    global class_preds
-
     with torch.no_grad():
         testing_frame_timeseries_jump = 1
 
@@ -39,7 +30,8 @@ def testing():
 
         testing_y_true = []
         testing_y_pred = []
-        for output in up.testing_data:
+        for correct_label in range(len(up.data)):
+            output = up.testing_data[correct_label]
             for segment in output:
                 starting_frame = 0
                 ending_frame = starting_frame + sequence_length
@@ -47,11 +39,8 @@ def testing():
                 frame_amount = len(segment)
                 if ending_frame > frame_amount:
                     ending_frame = frame_amount - 1
-                # print(starting_frame)
-                # print(ending_frame)
 
                 frame_pred = []
-                frame_correct = []
 
                 while ending_frame < frame_amount and ending_frame - starting_frame >= sequence_length:
                     testing_data = segment[starting_frame:ending_frame, :]
@@ -68,7 +57,6 @@ def testing():
                     # print(predicted)
                     # _, predicted = torch.max(outputs.data, 1)
                     frame_pred.append(int(predicted))
-                    frame_correct.append(int(testing_data_labels[0]))
                     n_samples += len(testing_data_labels)
                     n_correct += (predicted == testing_data_labels).sum().item()
                     # print(str(predicted[0]) + " was prediction. " + str(testing_data_labels[0]) + " was answer.")
@@ -78,64 +66,29 @@ def testing():
                     starting_frame += testing_frame_timeseries_jump
                     ending_frame = starting_frame + sequence_length
 
-                print("-------------")
-                print(frame_pred)
-                print(frame_correct)
-                cnt = 0
-                for kv in zip(frame_pred, frame_correct):
-                    if kv[0] == kv[1]:
-                        cnt += 1
-
-                print("accuracy:")
-                print(cnt / len(frame_correct))
-                print(len(frame_correct))
-
-                class_preds[frame_correct[0]].append(frame_pred)
-
-                print("-------------")
-
-        acc = 100.0 * n_correct / n_samples
-        print(f'Accuracy of the network IN TESTING: {acc} %')
-        print(classification_report(testing_y_true, testing_y_pred))
-
+                class_preds[correct_label].append(frame_pred)
 
 
 testing()
 
-#print(class_preds)
+for correct_label in range(1, 10):
+    correct = 0
+    shortest_seq_length = 99999
+    for li in class_preds[correct_label]:
+        shortest_seq_length = min(shortest_seq_length, len(li))
 
-class_one_acc = 0
-
-
-
-for i in range(1, 9):
-    cnt = 0
-    longest_list_len = 999
-    for li in class_preds[i]:
-        longest_list_len = min(longest_list_len, len(li))
-
+    print("Shortest sequence: " + str(shortest_seq_length))
     accuracy_over_frame = []
+    frame = 0
+    while frame < shortest_seq_length:
+        for sequence in range(len(class_preds[correct_label])):
+            if class_preds[correct_label][sequence][frame] == correct_label:
+                correct += 1
+        accuracy_over_frame.append((correct / len(class_preds[correct_label])) * 100)
+        correct = 0
+        frame += 1
 
-    idx = 0
-    while idx < longest_list_len:
-        for j in range(len(class_preds[i])):
-            if class_preds[i][j][idx] == i:
-                cnt += 1
-        accuracy_over_frame.append(cnt/len(class_preds[i]))
-        cnt = 0
-        idx += 1
+    plt.plot(accuracy_over_frame)
+    plt.show()
+    plt.close()
 
-    print(accuracy_over_frame)
-
-
-
-
-import matplotlib.pyplot as plt
-
-plt.plot(class_preds[1][0][0])
-plt.xlabel("frame")
-plt.ylabel("pred")
-
-plt.plot(class_preds[1][0][1])
-
-plt.show()
