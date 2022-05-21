@@ -4,22 +4,28 @@ import onnxruntime as ort
 import numpy as np
 import UNITY_CSV_PARSER
 import matplotlib.pyplot as plt
+from torch.utils.tensorboard import SummaryWriter
+import time
 
 up = UNITY_CSV_PARSER.UnityParser("../CSVs/testing_data1.csv", "../CSVs/testing_data2.csv", "../CSVs/testing_data3.csv",
                                   "../CSVs/testing_data4.csv", keep_every=1)
 # up.normalize()
 segments = up.split_data_into_segments_keep_earlier()
-segments = up.create_buckets_from_split(segments)
+segments = up.create_buckets_from_split(segments, randomize=False)
 up.split_data_2(segments, 0.2, 0.1)
 
-ort_sess = ort.InferenceSession('../NN_Models/may10model.onnx')
+model_name = 'Gaze_only_model'
+ort_sess = ort.InferenceSession('../NN_Models/' + model_name + '.onnx')
+
+now = time.strftime("%c")
+log_dir = ("./graphs/" + model_name)
+writer = SummaryWriter(log_dir)
 
 sequence_length = 45  # num of frames in a sequence
 input_size = 24  # num of inputs per frame
 batch_size = 1
 
 class_preds = [[] for i in range(10)]
-
 
 def testing():
     with torch.no_grad():
@@ -74,21 +80,37 @@ testing()
 for correct_label in range(1, 10):
     correct = 0
     shortest_seq_length = 99999
-    for li in class_preds[correct_label]:
-        shortest_seq_length = min(shortest_seq_length, len(li))
+    longest_seq_length = 0
+    total_length = 0
+    average_length = 0
 
+    length_list = [len(x) for x in class_preds[correct_label]]
+    median_length = int(np.median(length_list))
+
+    for li in class_preds[correct_label]:
+        total_length += len(li)
+        shortest_seq_length = min(shortest_seq_length, len(li))
+        longest_seq_length = max(longest_seq_length, len(li))
+
+    average_length = int(total_length / len(class_preds[correct_label]))
     print("Shortest sequence: " + str(shortest_seq_length))
+    print("Longest sequence: " + str(longest_seq_length))
+    print("Average length of sequence: " + str(average_length))
+    print("Median length of sequence: " + str(median_length))
+    print("-----------------------------------------------------")
+
     accuracy_over_frame = []
     frame = 0
-    while frame < shortest_seq_length:
+    num_sequences = 0
+    while frame < median_length:
         for sequence in range(len(class_preds[correct_label])):
-            if class_preds[correct_label][sequence][frame] == correct_label:
-                correct += 1
-        accuracy_over_frame.append((correct / len(class_preds[correct_label])) * 100)
+            if frame < len(class_preds[correct_label][sequence]):
+                correct += (class_preds[correct_label][sequence][frame] == correct_label)
+                num_sequences += 1
+        writer.add_scalar('Accuracy/Frame. Label: ' + str(correct_label), (correct / num_sequences) * 100, frame)
+        accuracy_over_frame.append((correct / num_sequences) * 100)
         correct = 0
+        num_sequences = 0
         frame += 1
 
-    plt.plot(accuracy_over_frame)
-    plt.show()
-    plt.close()
 

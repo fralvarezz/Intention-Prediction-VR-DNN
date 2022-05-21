@@ -133,12 +133,13 @@ class UnityParser:
         return seg_list
 
 
-    def create_buckets_from_split(self, splitted):
+    def create_buckets_from_split(self, splitted, randomize=True):
         sub_lists = [[] for x in range(10)]
         for li in splitted:
             sub_lists[int(li[-1][-1])].append(li)
-        for sub_li in sub_lists:
-            random.shuffle(sub_li)
+        if randomize:
+            for sub_li in sub_lists:
+                random.shuffle(sub_li)
         return sub_lists
 
     def cnt_nonzero_entries(self):
