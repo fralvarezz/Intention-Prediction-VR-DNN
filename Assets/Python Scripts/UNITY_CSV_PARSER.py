@@ -26,7 +26,7 @@ class UnityParser:
         for fname in args:
             with open(file=fname, newline="") as f:
                 data = np.genfromtxt((conv(x) for x in f), usecols=(
-                    5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29),
+                    5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 29),
                                      delimiter=";", skip_header=1, dtype=np.float32)
 
                 data = data[~np.isnan(data).any(axis=1), :]
