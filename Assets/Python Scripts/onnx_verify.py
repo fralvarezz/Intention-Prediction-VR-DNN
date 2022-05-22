@@ -14,7 +14,7 @@ segments = up.split_data_into_segments_keep_earlier()
 segments = up.create_buckets_from_split(segments, randomize=False)
 up.split_data_2(segments, 0.2, 0.1)
 
-model_name = 'nogaze'
+model_name = 'Gaze_only_model'
 ort_sess = ort.InferenceSession('../NN_Models/' + model_name + '.onnx')
 
 now = time.strftime("%c")
@@ -22,7 +22,7 @@ log_dir = ("./graphs2/" + model_name)
 writer = SummaryWriter(log_dir)
 
 sequence_length = 45  # num of frames in a sequence
-input_size = 15  # num of inputs per frame
+input_size = 9  # num of inputs per frame
 batch_size = 1
 
 class_preds = [[] for i in range(10)]
