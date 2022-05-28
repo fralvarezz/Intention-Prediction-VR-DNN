@@ -5,9 +5,16 @@ using UnityEngine;
 
 public class NetworkInference : MonoBehaviour
 {
+    public enum RunType
+    {
+        Runtime,
+        Replay
+    }
+    
     SocketInterface socketInterface;
 
     public int keepEvery;
+    public RunType runType;
     private int frameCount = 0;
     
     private GUIStyle currentStyle = null;
@@ -45,7 +52,17 @@ public class NetworkInference : MonoBehaviour
         
         if (frameCount % keepEvery == 0 && connectedCheck)
         {
-            var frame = EyeLogger.Instance.GetFrame();
+            float[] frame = new float[24];
+            
+            if(runType == RunType.Runtime)
+            {
+                frame = EyeLogger.Instance.GetFrame();
+            }
+            else if(runType == RunType.Replay && PlaybackManager.Instance.isPlaying)
+            {
+                frame = PlaybackManager.Instance.GetFrame();
+            }
+
             socketInterface.SendFrame(frame);
         }
         

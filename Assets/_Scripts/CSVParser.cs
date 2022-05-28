@@ -173,9 +173,12 @@ public class CSVParser
             Vector3 relativeControllerForward = new Vector3(float.Parse(csvLine[17], cultureInfo), float.Parse(csvLine[18], cultureInfo), float.Parse(csvLine[19], cultureInfo));
             
             Vector3 gazeVector = new Vector3(float.Parse(csvLine[20], cultureInfo), float.Parse(csvLine[21], cultureInfo), float.Parse(csvLine[22], cultureInfo));
+            Vector3 gazePoint = new Vector3(float.Parse(csvLine[23], cultureInfo), float.Parse(csvLine[24], cultureInfo), float.Parse(csvLine[25], cultureInfo));
+            Vector2 gazePointToScreen = new Vector2(float.Parse(csvLine[26], cultureInfo), float.Parse(csvLine[27], cultureInfo));
+            
             int objectTag = int.Parse(csvLine[csvLine.Length - 1]);
             
-            ReplayData replayData = new ReplayData(playerHeadPosition, playerHeadUp, playerHeadForward, relativeControllerPosition, relativeControllerUp, relativeControllerForward, gazeVector, objectTag);            
+            ReplayData replayData = new ReplayData(playerHeadPosition, playerHeadUp, playerHeadForward, relativeControllerPosition, relativeControllerUp, relativeControllerForward, gazeVector, gazePoint, gazePointToScreen, objectTag);            
             replayDataQueue.Enqueue(replayData);
         }
 

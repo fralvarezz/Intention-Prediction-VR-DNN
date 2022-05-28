@@ -13,12 +13,25 @@ public class PlaybackManager : MonoBehaviour
     
     public Queue<ReplayData> replayQueue;
     
-    private bool _isPlaying = false;
+    public bool isPlaying = false;
     private bool _anyFramesLeft = true;
+    
+    private float[] frame;
+
+    private static PlaybackManager _instance;
+    public static PlaybackManager Instance => _instance;
+
 
     private void Awake()
     {
         Application.targetFrameRate = 90;
+        
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+        } else {
+            _instance = this;
+        }
     }
 
     void Start()
@@ -28,21 +41,23 @@ public class PlaybackManager : MonoBehaviour
         {
             _anyFramesLeft = true;
         }
+
+        frame = new float[24];
     }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            _isPlaying = !_isPlaying;
+            isPlaying = !isPlaying;
         }
     }
 
     void LateUpdate()
     {
-        if (!_isPlaying || !_anyFramesLeft)
+        if (!isPlaying || !_anyFramesLeft)
         {
-            _isPlaying = false;
+            isPlaying = false;
             return;
         }
         
@@ -64,6 +79,7 @@ public class PlaybackManager : MonoBehaviour
         controller.transform.position = SetRelativePosition(playerHead.transform, data.relativeControllerPosition);
         controller.transform.up = data.relativeControllerUp;
         controller.transform.forward = data.relativeControllerForward;
+        frame = data.GetData();
         Debug.DrawRay(playerHead.transform.position, playerHead.transform.TransformDirection(data.gazeVector.normalized * 10f), Color.red);
         for (int i = 0; i < items.Count; i++)
         {
@@ -82,5 +98,10 @@ public class PlaybackManager : MonoBehaviour
     private Vector3 SetRelativePosition(Transform origin, Vector3 position)
     {
         return origin.position + position;
+    }
+    
+    public float[] GetFrame()
+    {
+        return frame;
     }
 }
