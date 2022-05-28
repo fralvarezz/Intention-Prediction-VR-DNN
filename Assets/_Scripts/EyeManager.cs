@@ -61,7 +61,7 @@ public class EyeManager : MonoBehaviour
         _gazeVector = data.combined.eye_data.gaze_direction_normalized;
         //convert gazeVector from right handed to left handed
         _gazeVector = new Vector3(-_gazeVector.x, _gazeVector.y, _gazeVector.z);
-        Debug.DrawRay(Camera.main.transform.position, _gazeVector * MaxDistance, Color.red);
+        Debug.DrawRay(Camera.main.transform.position, Camera.main.transform.TransformDirection(_gazeVector * MaxDistance), Color.red);
         
         //Casts the Gaze Ray casted and returns the position of the object hit
         Ray gazeRay;
