@@ -688,7 +688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab97f3d11cfc92d4e8e3a0a47d431962, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playbackFileName: Assets/CSVs/Training_Data/fer_data.csv
+  playbackFileName: Assets/CSVs/Testing_Data/testing_data1.csv
   playerHead: {fileID: 1718910543}
   controller: {fileID: 1315636270}
   items:

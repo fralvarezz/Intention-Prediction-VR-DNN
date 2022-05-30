@@ -7,14 +7,15 @@ import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 import time
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/testing_data1.csv", "../CSVs/testing_data2.csv", "../CSVs/testing_data3.csv",
-                                  "../CSVs/testing_data4.csv", keep_every=1)
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/Testing_Data/testing_data1.csv", "../CSVs/Testing_Data/testing_data2.csv",
+                                  "../CSVs/Testing_Data/testing_data3.csv",
+                                  "../CSVs/Testing_Data/testing_data4.csv", keep_every=1)
 # up.normalize()
 segments = up.split_data_into_segments_keep_earlier()
 segments = up.create_buckets_from_split(segments, randomize=False)
 up.split_data_2(segments, 0.2, 0.1)
 
-model_name = 'Gaze_only_model'
+model_name = 'LSTM-Eye'
 ort_sess = ort.InferenceSession('../NN_Models/' + model_name + '.onnx')
 
 now = time.strftime("%c")
@@ -26,6 +27,7 @@ input_size = 24  # num of inputs per frame
 batch_size = 1
 
 class_preds = [[] for i in range(10)]
+
 
 def testing():
     with torch.no_grad():
@@ -112,5 +114,3 @@ for correct_label in range(1, 10):
         correct = 0
         num_sequences = 0
         frame += 1
-
-

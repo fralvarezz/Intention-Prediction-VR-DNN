@@ -65,11 +65,14 @@ model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.0001)
 
-up = UNITY_CSV_PARSER.UnityParser("../CSVs/Training_Data/finaldata2.csv", "../CSVs/Training_Data/finaldata3.csv",
-                                   "../CSVs/Training_Data/finaldata4.csv", "../CSVs/Training_Data/finaldata5.csv",
-                                   "../CSVS/Training_Data/finaldata7.csv", "../CSVs/Training_Data/finaldata8.csv",
-                                  "../CSVs/Training_Data/fer_data.csv")
-#up.normalize()
+up = UNITY_CSV_PARSER.UnityParser("../CSVs/Training_Data/training_data1.csv",
+                                  "../CSVs/Training_Data/training_data2.csv",
+                                  "../CSVs/Training_Data/training_data3.csv",
+                                  "../CSVs/Training_Data/training_data4.csv",
+                                  "../CSVS/Training_Data/training_data5.csv",
+                                  "../CSVs/Training_Data/training_data6.csv",
+                                  "../CSVs/Training_Data/training_data7.csv")
+# up.normalize()
 segments = up.split_data_into_segments()
 segments = up.create_buckets_from_split(segments)
 up.split_data_2(segments, .2, .1)
@@ -79,10 +82,12 @@ frames_to_backlabel = 225
 up.update_label_frames(frames_to_backlabel)
 up.generate_rand()
 '''
-#frames_to_backlabel = 10
-#up.full_update_label_frames()
-#up.balance_data_set()
-#up.split_data(use_training=[8,9], use_validation=[7] )
+
+
+# frames_to_backlabel = 10
+# up.full_update_label_frames()
+# up.balance_data_set()
+# up.split_data(use_training=[8,9], use_validation=[7] )
 
 # data = torch.from_numpy(np.genfromtxt("formatted_success.csv", delimiter=";"))
 
@@ -148,6 +153,7 @@ def training_loop2():
         torch.save(model.cpu().state_dict(), path)
         model.cuda(device)
 
+
 def validation():
     with torch.no_grad():
         validation_frame_timeseries_jump = 1
@@ -173,7 +179,8 @@ def validation():
                     validation_data_labels = torch.from_numpy(validation_data_labels).to(device)
                     validation_data_labels = validation_data_labels.type(torch.LongTensor).to(device)
                     validation_data_no_labels = torch.from_numpy(validation_data_no_labels).to(device)
-                    validation_data_no_labels = validation_data_no_labels.reshape(batch_size, sequence_length, input_size)
+                    validation_data_no_labels = validation_data_no_labels.reshape(batch_size, sequence_length,
+                                                                                  input_size)
 
                     outputs = model(validation_data_no_labels)
                     _, predicted = torch.max(outputs.data, 1)
@@ -190,6 +197,7 @@ def validation():
         acc = 100.0 * n_correct / n_samples
         print(f'Accuracy of the network in VALIDATION: {acc} %')
         print(classification_report(validation_y_true, validation_y_pred))
+
 
 def testing():
     # Test the model
@@ -246,4 +254,4 @@ dummy_data = torch.randn(batch_size, sequence_length, input_size).to(device)
 onnx_name = ("../NN_Models/model" + now + ".onnx").replace(":", ",")
 torch.onnx.export(model, dummy_data, onnx_name,
                   opset_version=9, verbose=True)
-                  # Unity says opset_version=9 has the most support
+# Unity says opset_version=9 has the most support

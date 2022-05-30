@@ -18,7 +18,7 @@ def handle(data):
 
 
 def testing():
-    ort_sess = ort.InferenceSession('../NN_Models/may10model.onnx')
+    ort_sess = ort.InferenceSession('../NN_Models/LSTM-Full.onnx')
     sequence_length = 45  # num of frames in a sequence
     input_size = 24  # num of inputs per frame
     batch_size = 1

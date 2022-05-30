@@ -336,33 +336,3 @@ class UnityParser:
             for segment in output:
                 total_data += len(segment)
         return total_data
-
-# up = UnityParser("../CSVs/experiment12.csv")
-# up = UnityParser("../CSVs/experiment12.csv", "../CSVs/experiment1.csv")
-# up.split_data()
-
-# print(len(up.data[0]))
-# print(len(up.training_data[0]))
-# print(len(up.testing_data[0]))
-# print(up.get_random_interval(45))
-# up.update_label_frames(225)
-# up.generate_rand()
-# for f in up:
-# print(f)
-
-# up.save_to_disc("formatted_merge.csv")
-
-# data = np.genfromtxt("formatted_success.csv", delimiter=";")
-# print(data)
-
-# up = UnityParser("../CSVs/NewData/fer_data.csv", "../CSVs/NewData/jonas_data.csv",  keep_every=3)
-# segments = up.split_data_into_segments()
-# segments = up.create_buckets_from_split(segments)
-# up.split_data_2(segments, .2, .1)
-# up.full_update_label_frames()
-# up.generate_rand()
-# up.normalize()
-
-# print(up.get_class_ratio())
-# up.balance_data_set()
-# print(up.get_class_ratio())
