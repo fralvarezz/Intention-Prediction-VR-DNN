@@ -64,7 +64,7 @@ The model can then be used for inference by running the network inference script
 
 Its again important that the correct model is used. This can be set on line 87 of the NetworkSock.py script:
 
-``` self.ort_sess = ort.InferenceSession(<PATH TO FILE>) ```
+``` $ self.ort_sess = ort.InferenceSession(<PATH TO FILE>) ```
 
 The NetworkSock.py will listen for clients to run inference on localhost:18500.
 
