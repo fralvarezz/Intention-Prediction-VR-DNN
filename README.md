@@ -35,11 +35,41 @@ Finally, to install the PyTorch package with CUDA capabilties:
 To train a model data first has to be collected. First open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated and that
 the EyeLogger component state variable is set to Logging.
 
+![image](https://user-images.githubusercontent.com/22989470/171205307-3b349495-6b7a-44c6-bfb0-5624db61d98a.png)
+
+
 When running the scene the application will start logging the participant behavior to a file called eyeLog_x, where x is sequential.
 
 After data has been collected it can be used to train a model using the python script 
 
+``` $ python LSTM_NN.py ```
 
+Make sure that the line:
 
-![image](https://user-images.githubusercontent.com/22989470/171205307-3b349495-6b7a-44c6-bfb0-5624db61d98a.png)
+``` $ up = UNITY_CSV_PARSER.UnityParser(<PATH TO FILE>) ```
 
+is pointing to the collected data. After the training is finished a model will be placed inside the NN_Models folder.
+
+### Inference
+
+The model can then be used for inference by running the network inference script:
+
+``` $ python NetworkSock.py ```
+
+Its again important that the correct model is used. This can be set on line 87 of the NetworkSock.py script:
+
+``` self.ort_sess = ort.InferenceSession(<PATH TO FILE>) ```
+
+The NetworkSock.py will listen for clients to run inference on localhost:18500.
+
+You can then configure the Unity application for iference mode by first disabling the ExperimentManager and enabling the NetworkInference game object.
+
+![image](https://user-images.githubusercontent.com/22989470/171255812-4f61af1c-2b89-4a60-839c-56291e819023.png)
+
+Make sure that the EyeLogger component state is set to inference.
+
+![image](https://user-images.githubusercontent.com/22989470/171255977-70d0f566-fc3b-47a8-ab92-4b51d55e5de7.png)
+
+The application will then be able to predict user intent!
+
+**Note: ** It is not necessary to train your own model. The git repository contains a pretrained model so that inference can be run right away.
