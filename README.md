@@ -2,8 +2,7 @@
 
 ## Installation
 
-In order to use this application to its fullest a VR headset with eye tracking capabilities is required. We used HTC Vive Pro. Using another VR headset would require
-additional development from the user to integrate eye tracking and VR features.
+In order to use this application to its fullest a VR headset with eye tracking capabilities is required. This application was developed for the HTC Vive Pro Eye. Using another VR headset would require additional development from the user to integrate eye tracking and VR features.
 
 ### Prerequesites
 
@@ -34,7 +33,7 @@ Finally, to install the PyTorch package with CUDA capabilties:
 
 ### Training
 
-To train a model data first has to be collected. First open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated.
+To train a model, some data has to be collected first, or you could use the datafiles provided by us. To collect new data, first open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated.
 
 ![image](https://user-images.githubusercontent.com/22989470/171205307-3b349495-6b7a-44c6-bfb0-5624db61d98a.png)
 
@@ -68,7 +67,7 @@ Its again important that the correct model is used. This can be set on line 87 o
 
 The NetworkSock.py will listen for clients to run inference on localhost:18500.
 
-You can then configure the Unity application for iference mode by first disabling the ExperimentManager and enabling the NetworkInference game object.
+You can then configure the Unity application for inference mode by first disabling the ExperimentManager and enabling the NetworkInference game object.
 
 ![image](https://user-images.githubusercontent.com/22989470/171255812-4f61af1c-2b89-4a60-839c-56291e819023.png)
 
@@ -78,4 +77,4 @@ Make sure that the EyeLogger component state is set to inference.
 
 The application will then be able to predict user intent!
 
-**Note:**  It is not necessary to train your own model. The git repository contains a pretrained model so that inference can be run right away.
+**Note:**  It is not necessary to train your own model. The git repository contains three pretrained models so that inference can be run right away, with the default model being LSTM-Full.
