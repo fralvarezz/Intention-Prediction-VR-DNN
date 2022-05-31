@@ -78,4 +78,4 @@ Make sure that the EyeLogger component state is set to inference.
 
 The application will then be able to predict user intent!
 
-**Note: ** It is not necessary to train your own model. The git repository contains a pretrained model so that inference can be run right away.
+**Note:**  It is not necessary to train your own model. The git repository contains a pretrained model so that inference can be run right away.
