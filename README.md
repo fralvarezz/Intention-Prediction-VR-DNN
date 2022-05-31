@@ -30,6 +30,8 @@ Finally, to install the PyTorch package with CUDA capabilties:
 
 ``` $ conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch ```
 
+## Executing the application
+
 ### Training
 
 To train a model data first has to be collected. First open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated.
