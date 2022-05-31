@@ -32,10 +32,14 @@ Finally, to install the PyTorch package with CUDA capabilties:
 
 ### Training
 
-To train a model data first has to be collected. First open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated and that
-the EyeLogger component state variable is set to Logging.
+To train a model data first has to be collected. First open the Unity scene "ShelfOfItems" and make sure that the ExperimentManager game object is activated.
 
 ![image](https://user-images.githubusercontent.com/22989470/171205307-3b349495-6b7a-44c6-bfb0-5624db61d98a.png)
+
+It is also important to make sure the EyeLogger component state is set to Logging
+
+![image](https://user-images.githubusercontent.com/22989470/171256352-b46fb289-524b-4330-9e5a-c6f5e9fcf515.png)
+
 
 
 When running the scene the application will start logging the participant behavior to a file called eyeLog_x, where x is sequential.
